@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 def generateBoard(cars): #it generates 2-d array board
-    print("generate board")
     w, h = 6, 6
     arr = [[0 for x in range(w)] for y in range(h)]  # arr is 2-darray
 
@@ -53,9 +52,12 @@ for x in temp_lines:
        lines.append(x)
 
 boards = []
-
+game_count =1
 for line in lines:#the outermost loop
-    print(line)
+    boards.clear()
+    print("Game " + str(game_count))
+    print("Game " + str(game_count) +" "+ "string is : " + line)
+    game_count +=1
     print()#line break
 
     w, h = 6, 6
@@ -81,6 +83,7 @@ for line in lines:#the outermost loop
         fuel_dict[x] = fuel[i]
 
     #printing arr
+    print("Printing the line in 6x6")
     for i in range(6):
         print(arr[i])
 
@@ -164,13 +167,14 @@ for line in lines:#the outermost loop
                     temp_car[2] -= steps
                 temp_cars[indexofCar] = temp_car
                 boards.append(generateBoard(temp_cars))
-                print(car[4], move)
-                for x in generateBoard(temp_cars):
-                    print(x)
+                # print(car[4], move)
+                # for x in generateBoard(temp_cars):
+                #     print(x)
 
 
-print("it's boards!!")
-for board in boards:
-    print(board)
-print("size of the board", len(boards)) # so board has all the possible boards
+    print("Possible boards below")
+    for board in boards:
+        print(board)
+    print("size of the board", len(boards)) # so board has all the possible boards
+    print()
 
