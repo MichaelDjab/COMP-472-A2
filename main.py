@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-def generateBoard(cars):
+def generateBoard(cars): #it generates 2-d array board
     print("generate board")
     w, h = 6, 6
     arr = [[0 for x in range(w)] for y in range(h)]  # arr is 2-darray
@@ -52,6 +52,7 @@ for x in temp_lines:
     if not (x.startswith('#') or x.startswith('\n')): #if the line starts with # or '\n' just ignore
        lines.append(x)
 
+boards = []
 
 for line in lines:#the outermost loop
     print(line)
@@ -144,73 +145,32 @@ for line in lines:#the outermost loop
                       v_moves.append(b_elm)
                     cars.append([m, i_row, i_col, False, arr[i][j], v_moves, fuel])
 
-    #print("cars is here")
-    #print(cars)
-    #print()#line break
-    #print(arr)
-    # for car in cars:
-    #     if car[5]: #if car[5] - move list is not empty
-    #         print(car[4])
-    #         print(car[5])
-    #         print(arr)
-    #         for move in car[5]:
-    #             temp_arr = deepcopy(arr)
-    #             x = car[1]
-    #             y = car[2]
-    #             index = 0
-    #             if(move.startswith('D')): #D1 , D2 , D3
-    #                 print(move)
-    #                 while car[0] > index: #it will loop size times (moving one by one)
-    #                     steps = int(move[1])
-    #                     temp_arr[x+steps][y] = temp_arr[x][y] #putting arr[x][y] elm to the next line
-    #                     if index >= steps:
-    #                         counter = 0
-    #                         while counter < steps:
-    #                             temp_arr[x+counter][y] = '.'  # the old place for the elm will be empty space because it moved
-    #                             counter += 1
-    #                     index +=1
-    #                     x += 1
-    #                 boards.append(temp_arr)
-    #                 print(temp_arr)
-    #             if (move.startswith('U')):
-    #                 print(move)
-    #                 while car[0] > index:  # it will loop size times
-    #                     steps = int(move[1])
-    #                     temp_arr[x - steps][y] = temp_arr[x][y]  # putting arr[x][y] elm to the next line
-    #                     if index+1 >= steps: #steps = 2, index = 0,1
-    #                         counter = 0
-    #                         while counter < steps:
-    #                             temp_arr[x-counter][y] = '.'  # the old place for the elm will be empty space because it moved
-    #                             counter += 1
-    #
-    #                     index += 1
-    #                     x += 1
-    #                 boards.append(temp_arr)
-    #                 print(temp_arr)
-    # print()#line break
 
-
-    boards = []
-
+    #boards
     for car in cars:
         if car[5] :
-            # print("car is here")
-            # print(cars)
-            for move in car[5]:
+            for move in car[5]: #move = D1
+                temp_cars = deepcopy(cars)
+                temp_car = deepcopy(car)
                 steps = int(move[1])  # ex) D2 --> 2 will be steps
-                #i_car = deepcopy(car)
-                if(move == 'D2'):
-                    print()
+                indexofCar = temp_cars.index(car)
                 if(move.startswith('D')):
-                    car[1] += steps #changing x-coordinate
+                    temp_car[1] += steps #changing x-coordinate
                 elif(move.startswith('U')):
-                    car[1] -= steps
+                    temp_car[1] -= steps
                 elif(move.startswith('R')):
-                    car[2] += steps
-                else:
-                    car[2] -= steps
-                print(car[4] + move)
-                print("this is car", car)
-                print(generateBoard(cars))
+                    temp_car[2] += steps
+                else: #move.startswith('L')
+                    temp_car[2] -= steps
+                temp_cars[indexofCar] = temp_car
+                boards.append(generateBoard(temp_cars))
+                print(car[4], move)
+                for x in generateBoard(temp_cars):
+                    print(x)
 
-    #print(generateBoard(cars))
+
+print("it's boards!!")
+for board in boards:
+    print(board)
+print("size of the board", len(boards)) # so board has all the possible boards
+
