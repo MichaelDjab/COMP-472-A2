@@ -1,97 +1,10 @@
 from copy import deepcopy
-
-def generateBoard(cars): #it generates 2-d array board
-    w, h = 6, 6
-    arr = [[0 for x in range(w)] for y in range(h)]  # arr is 2-darray
-
-    x = 0
-    for i in range(6):
-        for j in range(6):
-            arr[i][j] = '.'  # all the elemnts are going to be empty space for now
-            x += 1
-
-    for car in cars:
-        size = car[0]
-        x = car[1] #0
-        y = car[2] #0
-        ishorizontal = car[3]
-        letter = car[4]
-        counter = 0
-        while counter < size:
-            if ishorizontal: #if car is horizontal
-                arr[x][y] = letter
-                y += 1
-            else: #if car is vertical
-                arr[x][y] = letter
-                x += 1
-            counter+=1
-
-    return arr
+import sys
 
 
-def goalOrNot(line):
-    if line[5] == 'A':
-        return True
-    else:
-        return False
-
-def h1nthvehicles(line):
-    indexAfterAA = line.rfind('A') + 1
-    count = 0
-    for x in range(indexAfterAA, 6):
-        if line[x] != '.':
-            count+=1
-    return count
-
-with open("sample-input.txt", "r") as f:
-    temp_lines = f.readlines()
-
-lines=[]
-for x in temp_lines:
-    if not (x.startswith('#') or x.startswith('\n')): #if the line starts with # or '\n' just ignore
-       lines.append(x)
-
-boards = []
-game_count =1
-for line in lines:#the outermost loop
-    boards.clear()
-    print("Game " + str(game_count))
-    print("Game " + str(game_count) +" "+ "string is : " + line)
-    game_count +=1
-    print()#line break
-
-    w, h = 6, 6
-    arr = [[0 for x in range(w)] for y in range(h)]
-    #putting into 2-d array
-    x=0
-    for i in range(6):
-        for j in range(6):
-            arr[i][j] = line[x]
-            x+=1
-    #fuel
-    letters=[];
-    fuel=[];
-    for idx, x in enumerate(line):
-        if idx > 36:
-            if x.isnumeric():
-                fuel.append(x)
-            elif x != ' ' and x != '\n':
-                letters.append(x)
-
-    fuel_dict={} #dictionary
-    for i, x in enumerate(letters):
-        fuel_dict[x] = fuel[i]
-
-    #printing arr
-    print("Printing the line in 6x6")
-    for i in range(6):
-        print(arr[i])
-
-    visited=list() #visited list, it checkes if the car is already visited
-
-    cars = []# a car (length, row, column, is_horizontal, name, list of possible moves, fuel)
-
-
+def extractCars(arr, fuel_dict): #extractCars returns cars[]
+    visited=list()
+    cars=[]
     for i in range(6): #6x6
         for j in range(6):
             if arr[i][j] not in visited and arr[i][j] != '.': #if the current elm is not visited AND is not '.'
@@ -147,34 +60,164 @@ for line in lines:#the outermost loop
                       b_elm = "U" + str(u_move)
                       v_moves.append(b_elm)
                     cars.append([m, i_row, i_col, False, arr[i][j], v_moves, fuel])
+    return cars
+#endof extractCars function
 
 
-    #boards
+def generatePossibleBoards(cars):
+    boards = []
+    letter_fuel = []
     for car in cars:
-        if car[5] :
-            for move in car[5]: #move = D1
+        fuel=0
+        letter=''
+        if car[5]:
+            isFirstMove = True
+            for move in car[5]:  # move = D1
                 temp_cars = deepcopy(cars)
                 temp_car = deepcopy(car)
                 steps = int(move[1])  # ex) D2 --> 2 will be steps
                 indexofCar = temp_cars.index(car)
-                if(move.startswith('D')):
-                    temp_car[1] += steps #changing x-coordinate
-                elif(move.startswith('U')):
-                    temp_car[1] -= steps
-                elif(move.startswith('R')):
-                    temp_car[2] += steps
-                else: #move.startswith('L')
-                    temp_car[2] -= steps
-                temp_cars[indexofCar] = temp_car
-                boards.append(generateBoard(temp_cars))
-                # print(car[4], move)
-                # for x in generateBoard(temp_cars):
-                #     print(x)
+                fuel = temp_car[6] #remaining fuel
+                letter = temp_car[4]
+                if (fuel >= steps):  # only when you have enough fuel for steps
+                    if (move.startswith('D')):
+                        temp_car[1] += steps  # changing x-coordinate
+                    elif (move.startswith('U')):
+                        temp_car[1] -= steps
+                    elif (move.startswith('R')):
+                        temp_car[2] += steps
+                    else:  # move.startswith('L')
+                        temp_car[2] -= steps
+                    fuel -= steps  # fuel is going to be reduced by how many steps it went
+                    temp_car[6] = fuel
+                    temp_cars[indexofCar] = temp_car
+                    boards.append(generateBoard(temp_cars))
+            letter_fuel.append(letter + str(fuel))
+    return boards,letter_fuel;
 
+def generateBoard(cars): #it generates 2-d array board
+    w, h = 6, 6
+    arr = [[0 for x in range(w)] for y in range(h)]  # arr is 2-darray
+
+    x = 0
+    for i in range(6):
+        for j in range(6):
+            arr[i][j] = '.'  # all the elemnts are going to be empty space for now
+            x += 1
+
+    for car in cars:
+        size = car[0]
+        x = car[1] #0
+        y = car[2] #0
+        ishorizontal = car[3]
+        letter = car[4]
+        counter = 0
+        while counter < size:
+            if ishorizontal: #if car is horizontal
+                arr[x][y] = letter
+                y += 1
+            else: #if car is vertical
+                arr[x][y] = letter
+                x += 1
+            counter+=1
+
+    return arr
+
+
+def generateFuel_dict(fuel_list):
+    letters = []
+    fuel = []
+    for elm in fuel_list:
+        letters.append(elm[0])
+        fuel.append(elm[1:])
+
+    fuel_dict = {}  # dictionary
+    for i, x in enumerate(letters):
+        fuel_dict[x] = fuel[i]
+
+    return fuel_dict
+
+
+def goalOrNot(line):
+    if line[5] == 'A':
+        return True
+    else:
+        return False
+
+def h1nthvehicles(line):
+    indexAfterAA = line.rfind('A') + 1
+    count = 0
+    for x in range(indexAfterAA, 6):
+        if line[x] != '.':
+            count+=1
+    return count
+
+
+#Beginning of main
+with open("sample-input.txt", "r") as f:
+    temp_lines = f.readlines()
+
+lines=[]
+for x in temp_lines:
+    if not (x.startswith('#') or x.startswith('\n')): #if the line starts with # or '\n' just ignore
+       lines.append(x)
+boards= [];
+game_count =1
+for line in lines:#the outermost loop
+    boards.clear()
+    print("Game " + str(game_count))
+    print("Game " + str(game_count) +" "+ "string is : " + line)
+    game_count +=1
+    print()#line break
+
+    w, h = 6, 6
+    arr = [[0 for x in range(w)] for y in range(h)]
+    #putting into 2-d array
+    x=0
+    for i in range(6):
+        for j in range(6):
+            arr[i][j] = line[x]
+            x+=1
+    #fuel
+    letters=[];
+    fuel=[];
+    for idx, x in enumerate(line):
+        if idx > 36:
+            if x.isnumeric():
+                fuel.append(x)
+            elif x != ' ' and x != '\n':
+                letters.append(x)
+
+
+    fuel_dict={} #dictionary
+    for i, x in enumerate(letters):
+        fuel_dict[x] = fuel[i]
+    #printing arr
+    print("Printing the line in 6x6")
+    for i in range(6):
+        print(arr[i])
+
+    cars = []# a car (length, row, column, is_horizontal, name, list of possible moves, fuel)
+
+    cars = extractCars(arr, fuel_dict)
+
+    #boards
+    boards = generatePossibleBoards(cars)[0]
+
+    remaining_fuel = generatePossibleBoards(cars)[1]
+    fuel_dict = generateFuel_dict(remaining_fuel)
+
+    print("remaining fuel", remaining_fuel)
+    print("fueldict!!", fuel_dict)
 
     print("Possible boards below")
     for board in boards:
         print(board)
+
+
     print("size of the board", len(boards)) # so board has all the possible boards
     print()
+
+
+
 
