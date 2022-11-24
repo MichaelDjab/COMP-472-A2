@@ -1,10 +1,29 @@
 from copy import deepcopy
 import sys
+class Car:
+    def __init__(self, size, row, col, is_horizontal, name, moves, fuel):
+        self.size = size
+        self.row = row
+        self.col = col
+        self.is_horizontal = is_horizontal
+        self.name = name
+        self.moves = moves
+        self.fuel = fuel
 
+class Board:
+    def __init__(self, arr, cars):
+        self.arr = arr #2-d array
+        self.cars = cars
 
-def extractCars(arr, fuel_dict): #extractCars returns cars[]
+def regenerateCarsMovelist(cars): #update car move lists
+    arr = generateBoard(cars)
+    fuel_list=[]
+    for car in cars:
+        fuel_list.append(car.name + str(car.fuel))
+    print("fuel list", fuel_list)
+    fuel_dict = generateFuel_dict(fuel_list)
+    cars.clear()#empty cars list because we already have arr(2-d array board) and fuel_dict
     visited=list()
-    cars=[]
     for i in range(6): #6x6
         for j in range(6):
             if arr[i][j] not in visited and arr[i][j] != '.': #if the current elm is not visited AND is not '.'
@@ -34,7 +53,7 @@ def extractCars(arr, fuel_dict): #extractCars returns cars[]
                       temp_col -= 1
                       b_elm = "L" + str(l_move)
                       h_moves.append(b_elm)
-                    cars.append([n, i_row, i_col, True, arr[i][j], h_moves, fuel]) #car appended
+                    cars.append(Car(n, i_row, i_col, True, arr[i][j], h_moves, fuel)) #creating a car object and putting it into cars[]
                 elif i != 5: #if arr[i][j] is vertical
                     m = 1
                     u_move = 0
@@ -59,41 +78,117 @@ def extractCars(arr, fuel_dict): #extractCars returns cars[]
                       temp_row -= 1
                       b_elm = "U" + str(u_move)
                       v_moves.append(b_elm)
-                    cars.append([m, i_row, i_col, False, arr[i][j], v_moves, fuel])
+                    cars.append(Car(m, i_row, i_col, False, arr[i][j], v_moves, fuel)) #creating a car object and putting it into cars[]
+    return cars
+
+
+
+
+
+def extractCars(arr, fuel_dict, boards): #extractCars returns cars[]
+    visited=list()
+    cars = []
+    for i in range(6): #6x6
+        for j in range(6):
+            if arr[i][j] not in visited and arr[i][j] != '.': #if the current elm is not visited AND is not '.'
+                i_row = i #initial row
+                i_col = j #initial col
+                if j != 5 and arr[i][j+1] == arr[i][j]: #if arr[i][j] is horizontal   , when j ==5 then it's the last elm of the line
+                    n = 1 # n is size
+                    r_move = 0 #right move
+                    l_move = 0 #left move
+                    h_moves = []
+                    temp_col = j
+                    if arr[i][j] in fuel_dict: #if fuel is specified
+                        fuel = int(fuel_dict[arr[i][j]])
+                    else: #otherwise fule is 100
+                        fuel = 100
+                    visited.append(arr[i][j]) #arr[i][j] which is the current elm is visited now
+                    while j+n != 6 and arr[i][j+n] == arr[i][j]: # while loop will run untill the last position of the car
+                        n += 1 #n is size
+                    while temp_col+n != 6 and arr[i][temp_col+n] == '.': #temp_col is just 'j' which is initial col number + n (car size) so arr[i][temp_col+n] is the next elm of the last position of car (in other words, it's checking if there is an empty space on the right side
+                      r_move +=1
+                      temp_col += 1
+                      f_elm = "R" + str(r_move)
+                      h_moves.append(f_elm)
+                    temp_col = i_col #temp_col is back to initial col
+                    while temp_col-1 >= 0 and arr[i][temp_col-1] == '.': #Back to the first position of the car to check if there is an empty space on the left side
+                      l_move +=1
+                      temp_col -= 1
+                      b_elm = "L" + str(l_move)
+                      h_moves.append(b_elm)
+                    cars.append(Car(n, i_row, i_col, True, arr[i][j], h_moves, fuel)) #creating a car object and putting it into cars[]
+                elif i != 5: #if arr[i][j] is vertical
+                    m = 1
+                    u_move = 0
+                    d_move = 0
+                    v_moves = []
+                    temp_row = i
+                    if arr[i][j] in fuel_dict:
+                        fuel = int(fuel_dict[arr[i][j]])
+                    else:
+                        fuel = 100
+                    visited.append(arr[i][j])
+                    while i+m != 6 and arr[i+m][j] == arr[i][j]:
+                        m += 1 # m is size
+                    while temp_row+m != 6 and arr[temp_row+m][j] == '.' :
+                      d_move +=1
+                      temp_row += 1
+                      f_elm = "D" + str(d_move)
+                      v_moves.append(f_elm)
+                    temp_row = i_row #temp_row is back to initial row
+                    while temp_row-1 >= 0 and arr[temp_row-1][j] == '.': #if the first position -1 is '.'
+                      u_move +=1
+                      temp_row -= 1
+                      b_elm = "U" + str(u_move)
+                      v_moves.append(b_elm)
+                    cars.append(Car(m, i_row, i_col, False, arr[i][j], v_moves, fuel)) #creating a car object and putting it into cars[]
+
+    boards.append(Board(arr, cars))#creation of board object and put it into boards[]
     return cars
 #endof extractCars function
 
-
-def generatePossibleBoards(cars):
+   # self.size = size
+   #      self.row = row
+   #      self.col = col
+   #      self.is_horizontal = is_horizontal
+   #      self.name = name
+   #      self.moves = moves
+   #      self.fuel = fuel
+def generatePossibleBoards(board): #boad is an object that has many cars
+    cars = board.cars
     boards = []
-    letter_fuel = []
+    cars = regenerateCarsMovelist(cars)#updating car moves list
     for car in cars:
-        fuel=0
-        letter=''
-        if car[5]:
-            isFirstMove = True
-            for move in car[5]:  # move = D1
+        if car.moves:
+            for move in car.moves:
                 temp_cars = deepcopy(cars)
                 temp_car = deepcopy(car)
                 steps = int(move[1])  # ex) D2 --> 2 will be steps
-                indexofCar = temp_cars.index(car)
-                fuel = temp_car[6] #remaining fuel
-                letter = temp_car[4]
+                fuel = temp_car.fuel #remaining fuel
+                #getting indexofCar
+                for x in temp_cars:
+                    if(x.name == temp_car.name):
+                        indexofCar = temp_cars.index(x)
                 if (fuel >= steps):  # only when you have enough fuel for steps
                     if (move.startswith('D')):
-                        temp_car[1] += steps  # changing x-coordinate
+                        temp_car.row += steps  # changing x-coordinate
                     elif (move.startswith('U')):
-                        temp_car[1] -= steps
+                        temp_car.row -= steps
                     elif (move.startswith('R')):
-                        temp_car[2] += steps
+                        temp_car.col += steps
                     else:  # move.startswith('L')
-                        temp_car[2] -= steps
+                        temp_car.col -= steps
                     fuel -= steps  # fuel is going to be reduced by how many steps it went
-                    temp_car[6] = fuel
-                    temp_cars[indexofCar] = temp_car
-                    boards.append(generateBoard(temp_cars))
-            letter_fuel.append(letter + str(fuel))
-    return boards,letter_fuel;
+                    temp_car.fuel = fuel
+                    for y in temp_cars:
+                        if(y.name == temp_car.name):
+                            temp_cars[indexofCar] = temp_car
+                    print("temp_car name per each for loop", temp_car.name)
+                    print("move", move)
+                    arr = generateBoard(temp_cars)
+                    boards.append(Board(arr, temp_cars))
+    return boards
 
 def generateBoard(cars): #it generates 2-d array board
     w, h = 6, 6
@@ -106,11 +201,11 @@ def generateBoard(cars): #it generates 2-d array board
             x += 1
 
     for car in cars:
-        size = car[0]
-        x = car[1] #0
-        y = car[2] #0
-        ishorizontal = car[3]
-        letter = car[4]
+        size = car.size
+        x = car.row #0
+        y = car.col #0
+        ishorizontal = car.is_horizontal
+        letter = car.name
         counter = 0
         while counter < size:
             if ishorizontal: #if car is horizontal
@@ -138,8 +233,8 @@ def generateFuel_dict(fuel_list):
     return fuel_dict
 
 
-def goalOrNot(line):
-    if line[5] == 'A':
+def goalOrNot(arr): #arr is 2-d array
+    if arr[2][5] == 'A':
         return True
     else:
         return False
@@ -198,25 +293,30 @@ for line in lines:#the outermost loop
         print(arr[i])
 
     cars = []# a car (length, row, column, is_horizontal, name, list of possible moves, fuel)
-
-    cars = extractCars(arr, fuel_dict)
+    cars = extractCars(arr, fuel_dict, boards)
+    print()
+    # for x in boards_k:
+    #     for y in x.cars:
+    #         print(y.fuel)
 
     #boards
-    boards = generatePossibleBoards(cars)[0]
+    boards = generatePossibleBoards(boards[0]) #getting initial board
 
-    remaining_fuel = generatePossibleBoards(cars)[1]
-    fuel_dict = generateFuel_dict(remaining_fuel)
-
-    print("remaining fuel", remaining_fuel)
-    print("fueldict!!", fuel_dict)
-
-    print("Possible boards below")
-    for board in boards:
-        print(board)
+    for board in boards: #initial boards
+        print("board", board.arr)
+        boards = generatePossibleBoards(board)
+        if(goalOrNot(board.arr)):
+            print("goal")
+            break
+    print(board.arr)
 
 
-    print("size of the board", len(boards)) # so board has all the possible boards
-    print()
+        # for car in board.cars:
+        #     print(car.name, car.fuel)
+
+
+
+
 
 
 
