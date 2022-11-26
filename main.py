@@ -1,5 +1,8 @@
 from copy import deepcopy
 import sys
+from random import random
+
+
 class Car:
     def __init__(self, size, row, col, is_horizontal, name, moves, fuel):
         self.size = size
@@ -13,14 +16,14 @@ class Car:
 class Board:
     def __init__(self, arr, cars):
         self.arr = arr #2-d array
-        self.cars = cars
+        self.cars = cars #cars is list , that have car objects      cars=[]   cars.append(Car(2, 0, 0, True, 'A', ['R1', 'R2'], 100))
 
 def regenerateCarsMovelist(cars): #update car move lists
     arr = generateBoard(cars)
     fuel_list=[]
     for car in cars:
         fuel_list.append(car.name + str(car.fuel))
-    print("fuel list", fuel_list)
+    #print("fuel list", fuel_list)
     fuel_dict = generateFuel_dict(fuel_list)
     cars.clear()#empty cars list because we already have arr(2-d array board) and fuel_dict
     visited=list()
@@ -102,7 +105,7 @@ def extractCars(arr, fuel_dict, boards): #extractCars returns cars[]
                     if arr[i][j] in fuel_dict: #if fuel is specified
                         fuel = int(fuel_dict[arr[i][j]])
                     else: #otherwise fule is 100
-                        fuel = 100
+                        fuel = 10000
                     visited.append(arr[i][j]) #arr[i][j] which is the current elm is visited now
                     while j+n != 6 and arr[i][j+n] == arr[i][j]: # while loop will run untill the last position of the car
                         n += 1 #n is size
@@ -127,7 +130,7 @@ def extractCars(arr, fuel_dict, boards): #extractCars returns cars[]
                     if arr[i][j] in fuel_dict:
                         fuel = int(fuel_dict[arr[i][j]])
                     else:
-                        fuel = 100
+                        fuel = 10000
                     visited.append(arr[i][j])
                     while i+m != 6 and arr[i+m][j] == arr[i][j]:
                         m += 1 # m is size
@@ -161,6 +164,7 @@ def generatePossibleBoards(board): #boad is an object that has many cars
     cars = regenerateCarsMovelist(cars)#updating car moves list
     for car in cars:
         if car.moves:
+            #print(car.moves)
             for move in car.moves:
                 temp_cars = deepcopy(cars)
                 temp_car = deepcopy(car)
@@ -184,9 +188,10 @@ def generatePossibleBoards(board): #boad is an object that has many cars
                     for y in temp_cars:
                         if(y.name == temp_car.name):
                             temp_cars[indexofCar] = temp_car
-                    print("temp_car name per each for loop", temp_car.name)
-                    print("move", move)
+                    print("move", temp_car.name+move)
                     arr = generateBoard(temp_cars)
+                    for i in range(6):
+                        print(arr[i])
                     boards.append(Board(arr, temp_cars))
     return boards
 
@@ -239,13 +244,42 @@ def goalOrNot(arr): #arr is 2-d array
     else:
         return False
 
-def h1nthvehicles(line):
-    indexAfterAA = line.rfind('A') + 1
+def h1nthvehicles(arr):
+    indexAfterAA = arr[2].rfind('A') + 1
     count = 0
     for x in range(indexAfterAA, 6):
         if line[x] != '.':
             count+=1
     return count
+
+
+
+
+def UniformCostSearch(boards):
+    jobs_list = []
+    visited = []
+    for board in boards:
+        jobs_list.append(board) #putting into jobs_list
+    for node in jobs_list:
+        #print the size of jobs_list
+        #print("jobs_list size: ", len(jobs_list))
+        if goalOrNot(node.arr):
+            print("goal")
+            for i in range(6):
+                print(node.arr[i])
+            break
+        else:
+            if node.arr not in visited:
+                visited.append(node.arr)#node is already visited
+            else:
+                 #remove node from jobs_list
+                 jobs_list.remove(node)
+            children_nodes = generatePossibleBoards(node)
+            for child in children_nodes:
+                if child.arr not in visited:
+                    jobs_list.append(child)
+
+
 
 
 #Beginning of main
@@ -264,7 +298,8 @@ for line in lines:#the outermost loop
     print("Game " + str(game_count) +" "+ "string is : " + line)
     game_count +=1
     print()#line break
-
+    if(game_count == 4):
+        print()
     w, h = 6, 6
     arr = [[0 for x in range(w)] for y in range(h)]
     #putting into 2-d array
@@ -295,25 +330,13 @@ for line in lines:#the outermost loop
     cars = []# a car (length, row, column, is_horizontal, name, list of possible moves, fuel)
     cars = extractCars(arr, fuel_dict, boards)
     print()
-    # for x in boards_k:
-    #     for y in x.cars:
-    #         print(y.fuel)
+
+
 
     #boards
     boards = generatePossibleBoards(boards[0]) #getting initial board
 
-    for board in boards: #initial boards
-        print("board", board.arr)
-        boards = generatePossibleBoards(board)
-        if(goalOrNot(board.arr)):
-            print("goal")
-            break
-    print(board.arr)
-
-
-        # for car in board.cars:
-        #     print(car.name, car.fuel)
-
+    UniformCostSearch(boards)
 
 
 
