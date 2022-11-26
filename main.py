@@ -188,10 +188,10 @@ def generatePossibleBoards(board): #boad is an object that has many cars
                     for y in temp_cars:
                         if(y.name == temp_car.name):
                             temp_cars[indexofCar] = temp_car
-                    print("move", temp_car.name+move)
+                    #print("move", temp_car.name+move)
                     arr = generateBoard(temp_cars)
-                    for i in range(6):
-                        print(arr[i])
+                    # for i in range(6):
+                    #     print(arr[i])
                     boards.append(Board(arr, temp_cars))
     return boards
 
