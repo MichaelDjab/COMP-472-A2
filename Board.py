@@ -1,0 +1,161 @@
+from Car import Car
+
+
+# board class represents the rush hour 6 x 6 board
+class Board:
+
+    # initializes the board with a string
+    def __init__(self, board_as_string):
+        self.board_as_string = board_as_string
+        self.board_as_array = self.get_board_array()
+        self.fuel_dictionary = self.extract_fuel()
+        self.cars = self.extract_cars()
+        self.next_moves = 0
+        self.is_solution = self.is_solution()
+
+    # shows the board
+    def show_board(self):
+        for i in range(6):
+            print(self.board_as_array[i])
+
+    # gets the board as an array
+    def get_board_array(self):
+        board_array = [[0 for x in range(6)] for y in range(6)]
+
+        x = 0
+        for i in range(6):
+            for j in range(6):
+                board_array[i][j] = self.board_as_string[x]
+                x += 1
+        return board_array
+
+    # extracts the fuel
+    def extract_fuel(self):
+        letters = []
+        fuel = []
+        for index, character in enumerate(self.board_as_string):
+            if index > 36:
+                if character.isnumeric():
+                    fuel.append(character)
+                elif character != ' ' and character != '\n':
+                    letters.append(character)
+
+        fuel_dict = {}  # dictionary
+        for i, character in enumerate(letters):
+            fuel_dict[character] = fuel[i]
+
+        return fuel_dict
+
+    # extracts a list of cars from the board
+    def extract_cars(self):
+
+        # list of visited character cells in the board
+        visited = list()
+
+        # will be a list of cars on the board
+        cars = []
+
+        # iterage through the board array and extract the cars
+        for i in range(6):
+            for j in range(6):
+                # Not visited and is not '.'
+                if self.board_as_array[i][j] not in visited and self.board_as_array[i][j] != '.':
+                    i_row = i  # initial row
+                    i_col = j  # initial col
+
+                    # if arr[i][j] is horizontal, when j == 5 then it's the last elm of the line
+                    if j != 5 and self.board_as_array[i][j + 1] == self.board_as_array[i][j]:
+                        n = 1  # n is size
+                        r_move = 0  # right move
+                        l_move = 0  # left move
+                        h_moves = []
+                        temp_col = j
+
+                        # Fuel amount is specified
+                        if self.board_as_array[i][j] in self.fuel_dictionary:
+                            fuel = int(self.fuel_dictionary[self.board_as_array[i][j]])
+                        else:  # otherwise fuel is 100
+                            fuel = 100
+
+                        # Add currently visited cell
+                        visited.append(self.board_as_array[i][j])
+
+                        # while loop will run until it reaches the last position of the car
+                        while j + n != 6 and self.board_as_array[i][j + n] == self.board_as_array[i][j]:
+                            n += 1  # n is size
+
+                        # temp_col is just 'j' which is the initial col number + n (car size) so arr[i][temp_col+n] is
+                        # the next elm of the last position of car (in other words, it's checking if there is an
+                        # empty space on the right side
+                        while temp_col + n != 6 and self.board_as_array[i][temp_col + n] == '.':
+                            r_move += 1
+                            temp_col += 1
+                            f_elm = "R" + str(r_move)
+                            h_moves.append(f_elm)
+
+                        # temp_col is back to initial col
+                        temp_col = i_col
+
+                        # Back to the first position of the car to check if there is an empty space on the left side
+                        while temp_col - 1 >= 0 and self.board_as_array[i][temp_col - 1] == '.':
+                            l_move += 1
+                            temp_col -= 1
+                            b_elm = "L" + str(l_move)
+                            h_moves.append(b_elm)
+
+                        # create a car according to the following convention:
+                        # Car(size, row, column, is horizontal, letter of car, possible moves, fuel)
+                        car = Car(n, i_row, i_col, True, self.board_as_array[i][j], h_moves, fuel)
+
+                        # creating a car object and putting it into cars[]
+                        cars.append(car)
+
+                    # if arr[i][j] is vertical
+                    elif i != 5:
+                        m = 1
+                        u_move = 0
+                        d_move = 0
+                        v_moves = []
+                        temp_row = i
+
+                        # fuel is specified
+                        if self.board_as_array[i][j] in self.fuel_dictionary:
+                            fuel = int(self.fuel_dictionary[self.board_as_array[i][j]])
+                        else:
+                            fuel = 100
+
+                        # append currently visited cell
+                        visited.append(self.board_as_array[i][j])
+
+                        while i + m != 6 and self.board_as_array[i + m][j] == self.board_as_array[i][j]:
+                            m += 1  # m is size
+                        while temp_row + m != 6 and self.board_as_array[temp_row + m][j] == '.':
+                            d_move += 1
+                            temp_row += 1
+                            f_elm = "D" + str(d_move)
+                            v_moves.append(f_elm)
+
+                        temp_row = i_row  # temp_row is back to initial row
+
+                        # If the first position -1 is '.'
+                        while temp_row - 1 >= 0 and self.board_as_array[temp_row - 1][j] == '.':
+                            u_move += 1
+                            temp_row -= 1
+                            b_elm = "U" + str(u_move)
+                            v_moves.append(b_elm)
+                        car = Car(m, i_row, i_col, False, self.board_as_array[i][j], v_moves, fuel)
+                        cars.append(car)  # creating a car object and putting it into cars[]
+        return cars
+
+    def get_moves(self):
+        print("getting the moves")
+
+    def get_board_given_move(self, move, car):
+        new_board_as_string = self.board_as_string
+
+
+    # returns true if the ambulance is at the exit
+    def is_solution(self):
+        print(self.board_as_string[17])
+        return self.board_as_string[17] == 'A'
+
