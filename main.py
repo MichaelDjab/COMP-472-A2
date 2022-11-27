@@ -14,10 +14,17 @@ class Car:
         self.fuel = fuel
 
 class Board:
-    def __init__(self, arr, cars):
+    def __init__(self, arr, cars, parent, parent_car_move):
         self.arr = arr #2-d array
         self.cars = cars #cars is list , that have car objects      cars=[]   cars.append(Car(2, 0, 0, True, 'A', ['R1', 'R2'], 100))
-
+        self.parent_board = parent
+        count = 0
+        temp_parent_board = self.parent_board
+        while(temp_parent_board != None):
+            temp_parent_board = temp_parent_board.parent_board
+            count += 1
+        self.cost = count
+        self.parent_car_move = parent_car_move
 def regenerateCarsMovelist(cars): #update car move lists
     arr = generateBoard(cars)
     fuel_list=[]
@@ -147,7 +154,7 @@ def extractCars(arr, fuel_dict, boards): #extractCars returns cars[]
                       v_moves.append(b_elm)
                     cars.append(Car(m, i_row, i_col, False, arr[i][j], v_moves, fuel)) #creating a car object and putting it into cars[]
 
-    boards.append(Board(arr, cars))#creation of board object and put it into boards[]
+    boards.append(Board(arr, cars, None, None))#creation of board object and put it into boards[]
     return cars
 #endof extractCars function
 
@@ -162,6 +169,7 @@ def generatePossibleBoards(board): #boad is an object that has many cars
     cars = board.cars
     boards = []
     cars = regenerateCarsMovelist(cars)#updating car moves list
+    parent_board = board
     for car in cars:
         if car.moves:
             #print(car.moves)
@@ -192,7 +200,8 @@ def generatePossibleBoards(board): #boad is an object that has many cars
                     arr = generateBoard(temp_cars)
                     # for i in range(6):
                     #     print(arr[i])
-                    boards.append(Board(arr, temp_cars))
+                    boards.append(Board(arr, temp_cars, parent_board, temp_car.name+" "+move))
+                    parent_bord = boards[-1] #parent board that was just put into boards[] is the last elm of boards[]
     return boards
 
 def generateBoard(cars): #it generates 2-d array board
@@ -257,7 +266,8 @@ def h1nthvehicles(arr):
 
 def UniformCostSearch(boards):
     jobs_list = []
-    visited = []
+    closed = []
+    count = 1
     for board in boards:
         jobs_list.append(board) #putting into jobs_list
     for node in jobs_list:
@@ -265,18 +275,31 @@ def UniformCostSearch(boards):
         #print("jobs_list size: ", len(jobs_list))
         if goalOrNot(node.arr):
             print("goal")
+            print("cost ",node.cost)
             for i in range(6):
                 print(node.arr[i])
+            print()
+            while(node.parent_board != None):
+                if(node.parent_board.parent_board == None):
+                    print("initial board")
+                else:
+                    print("parent ", count)
+                    count+=1
+                print(node.parent_car_move)
+                for i in range(6):
+                    print(node.parent_board.arr[i])
+                print()
+                node = node.parent_board
             break
         else:
-            if node.arr not in visited:
-                visited.append(node.arr)#node is already visited
+            if node.arr not in closed:
+                closed.append(node.arr)#node is already visited
             else:
                  #remove node from jobs_list
                  jobs_list.remove(node)
             children_nodes = generatePossibleBoards(node)
             for child in children_nodes:
-                if child.arr not in visited:
+                if child.arr not in closed:
                     jobs_list.append(child)
 
 
