@@ -265,12 +265,12 @@ def h1nthvehicles(arr):
 
 
 def UniformCostSearch(boards):
-    jobs_list = []
-    closed = []
+    opened_list = []
+    closed_list = []
     count = 1
     for board in boards:
-        jobs_list.append(board) #putting into jobs_list
-    for node in jobs_list:
+        opened_list.append(board) #putting into jobs_list
+    for node in opened_list:
         #print the size of jobs_list
         #print("jobs_list size: ", len(jobs_list))
         if goalOrNot(node.arr):
@@ -292,15 +292,15 @@ def UniformCostSearch(boards):
                 node = node.parent_board
             break
         else:
-            if node.arr not in closed:
-                closed.append(node.arr)#node is already visited
+            if node.arr not in closed_list:
+                closed_list.append(node.arr)#node is already visited
             else:
                  #remove node from jobs_list
-                 jobs_list.remove(node)
+                 opened_list.remove(node)
             children_nodes = generatePossibleBoards(node)
             for child in children_nodes:
-                if child.arr not in closed:
-                    jobs_list.append(child)
+                if child.arr not in closed_list:
+                    opened_list.append(child)
 
 
 
