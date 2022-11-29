@@ -30,9 +30,10 @@ def main():
 
     # get_board_given_move as the name suggests outputs a new board given a move and a car, it is a board method
     # which means that any board can call this method for all its moves
-    next_test_board = test_board.get_board_given_move('U1', test_l_car)
+    next_test_board = test_board.get_board_given_move('U2', test_l_car)
 
     print(next_test_board.show_board())
+    print(next_test_board.board_as_string)
 
 
 main()

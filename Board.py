@@ -159,7 +159,7 @@ class Board:
 
         if move.startswith('U'):
 
-            while not num_moves == 0:
+            while not num_moves == 0 and not car.fuel == 0:
                 # get the positions
                 u_pos_minus_1 = car.row * 6 + car.col - 6
                 d_pos = car.row * 6 + car.col + car.size*6 - 6
@@ -173,9 +173,10 @@ class Board:
                 new_board_str = new_board_str[:u_pos_minus_1] + car.name + new_board_str[u_pos_minus_1 + 1:]
 
                 car.row = car.row - 1
+                car.fuel = car.fuel - 1
         if move.startswith('R'):
 
-            while not num_moves == 0:
+            while not num_moves == 0 and not car.fuel == 0:
 
                 # get the positions
                 l_pos = car.row * 6 + car.col
@@ -190,10 +191,11 @@ class Board:
                 new_board_str = new_board_str[:r_pos_plus_1] + car.name + new_board_str[r_pos_plus_1 + 1:]
 
                 car.col = car.col + 1
+                car.fuel = car.fuel - 1
 
         if move.startswith('D'):
 
-            while not num_moves == 0:
+            while not num_moves == 0 and not car.fuel == 0:
                 # get the positions
                 u_pos = car.row * 6 + car.col
                 d_pos_plus_1 = car.row * 6 + car.col + car.size*6
@@ -207,10 +209,11 @@ class Board:
                 new_board_str = new_board_str[:d_pos_plus_1] + car.name + new_board_str[d_pos_plus_1 + 1:]
 
                 car.row = car.row + 1
+                car.fuel = car.fuel - 1
 
         if move.startswith('L'):
 
-            while not num_moves == 0:
+            while not num_moves == 0 and not car.fuel == 0:
                 # get the positions
                 l_pos_minus_1 = car.row * 6 + car.col - 1
                 r_pos = car.row * 6 + car.col + car.size - 1
@@ -224,6 +227,19 @@ class Board:
                 new_board_str = new_board_str[:l_pos_minus_1] + car.name + new_board_str[l_pos_minus_1 + 1:]
 
                 car.col = car.col - 1
+                car.fuel = car.fuel - 1
+
+        # adjust the fuel consumption
+        fuel_string = new_board_str[37:]
+
+        # if the fuel string already has the car and its fuel amount, adjust it
+        if car.name in fuel_string:
+            for i, char in enumerate(fuel_string):
+                if char == car.name:
+                    new_board_str = new_board_str[:38 + i] + str(car.fuel) + new_board_str[39 + i:]
+        # otherwise concatenate it at the end
+        else:
+            new_board_str = new_board_str + " " + car.name + str(car.fuel)
 
         return Board(new_board_str)
 
