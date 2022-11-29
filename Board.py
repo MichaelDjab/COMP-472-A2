@@ -147,15 +147,87 @@ class Board:
                         cars.append(car)  # creating a car object and putting it into cars[]
         return cars
 
-    def get_moves(self):
-        print("getting the moves")
+    def get_board_given_move(self, move, cr):
 
-    def get_board_given_move(self, move, car):
-        new_board_as_string = self.board_as_string
+        car = Car(cr.size, cr.row, cr.col, cr.is_horizontal, cr.name, cr.moves, cr.fuel)
 
+        # copy the current board string
+        new_board_str = self.board_as_string
+
+        # get number of moves
+        num_moves = int(move[1])
+
+        if move.startswith('U'):
+
+            while not num_moves == 0:
+                # get the positions
+                u_pos_minus_1 = car.row * 6 + car.col - 6
+                d_pos = car.row * 6 + car.col + car.size*6 - 6
+
+                num_moves = num_moves - 1
+
+                # moving up means we replace the car character with '.' on the bottom...
+                new_board_str = new_board_str[:d_pos] + '.' + new_board_str[d_pos + 1:]
+
+                # and replace '.' with the car character on the top
+                new_board_str = new_board_str[:u_pos_minus_1] + car.name + new_board_str[u_pos_minus_1 + 1:]
+
+                car.row = car.row - 1
+        if move.startswith('R'):
+
+            while not num_moves == 0:
+
+                # get the positions
+                l_pos = car.row * 6 + car.col
+                r_pos_plus_1 = car.row * 6 + car.col + car.size
+
+                num_moves = num_moves - 1
+
+                # moving to the right means we replace the car character with '.' on the left...
+                new_board_str = new_board_str[:l_pos] + '.' + new_board_str[l_pos + 1:]
+
+                # and replace '.' with the car character on the right
+                new_board_str = new_board_str[:r_pos_plus_1] + car.name + new_board_str[r_pos_plus_1 + 1:]
+
+                car.col = car.col + 1
+
+        if move.startswith('D'):
+
+            while not num_moves == 0:
+                # get the positions
+                u_pos = car.row * 6 + car.col
+                d_pos_plus_1 = car.row * 6 + car.col + car.size*6
+
+                num_moves = num_moves - 1
+
+                # moving down means we replace the car character with '.' on the top...
+                new_board_str = new_board_str[:u_pos] + '.' + new_board_str[u_pos + 1:]
+
+                # and replace '.' with the car character under
+                new_board_str = new_board_str[:d_pos_plus_1] + car.name + new_board_str[d_pos_plus_1 + 1:]
+
+                car.row = car.row + 1
+
+        if move.startswith('L'):
+
+            while not num_moves == 0:
+                # get the positions
+                l_pos_minus_1 = car.row * 6 + car.col - 1
+                r_pos = car.row * 6 + car.col + car.size - 1
+
+                num_moves = num_moves - 1
+
+                # moving to the left means we replace the car character with '.' on the right...
+                new_board_str = new_board_str[:r_pos] + '.' + new_board_str[r_pos + 1:]
+
+                # and replace '.' with the car character on the left
+                new_board_str = new_board_str[:l_pos_minus_1] + car.name + new_board_str[l_pos_minus_1 + 1:]
+
+                car.col = car.col - 1
+
+        return Board(new_board_str)
 
     # returns true if the ambulance is at the exit
     def is_solution(self):
         print(self.board_as_string[17])
         return self.board_as_string[17] == 'A'
-
