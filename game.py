@@ -137,6 +137,14 @@ class Board:
 
         return children
 
+    def is_goal_state(self):
+        goal_state = True
+        for car in self.cars:
+            if car.name == "A":
+                goal_state = False
+
+        return goal_state
+
     def new_board_after_move(self, move_car, move):
         # initialize child board member variables
         parent = self
@@ -270,7 +278,7 @@ def initialize_game_components(game_string, board_size=36):
 
 
 # game_board_strings = read_game_file("sample-input.txt")
-# board = initialize_game_components(game_board_strings[3])
+# board = initialize_game_components(game_board_strings[0])
 # print(board)
 # for car in board.cars:
 #     print(car)
@@ -280,6 +288,7 @@ def initialize_game_components(game_string, board_size=36):
 #     print(child.parent)
 #     print("====child=====")
 #     print(child.previous_move)
+#     print("Goal state: ", child.is_goal_state())
 #     print(child)
 #     for child_car in child.cars:
 #         print(child_car)
