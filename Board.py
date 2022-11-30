@@ -5,14 +5,20 @@ from Car import Car
 class Board:
 
     # initializes the board with a string
-    def __init__(self, board_as_string):
+
+    def __init__(self, board_as_string, parent=None, g_of_n=0, last_move=None):
         self.board_as_string = board_as_string
-        self.valet_service()
         self.board_as_array = self.get_board_array()
         self.fuel_dictionary = self.extract_fuel()
         self.cars = self.extract_cars()
-        self.next_moves = 0
+        self.valet_service()
+        self.moves = []
+        if last_move is not None:
+            self.moves = parent.moves + [last_move]
         self.is_solution = self.is_solution()
+        self.parent = parent
+        self.g_of_n = g_of_n
+        self.visited = False
 
     # shows the board
     def show_board(self):
@@ -153,7 +159,7 @@ class Board:
         car = Car(cr.size, cr.row, cr.col, cr.is_horizontal, cr.name, cr.moves, cr.fuel)
 
         # check for available fuel
-        if car.fuel is 0:
+        if car.fuel == 0:
             return None
 
         # copy the current board string
@@ -245,7 +251,19 @@ class Board:
         else:
             new_board_str = new_board_str + " " + car.name + str(car.fuel)
 
-        return Board(new_board_str)
+        # add move to get to this board from parent and return
+        last_move = car.name
+
+        if move[0] == 'U':
+            last_move = last_move + " up " + move[1]
+        if move[0] == 'R':
+            last_move = last_move + " right " + move[1]
+        if move[0] == 'D':
+            last_move = last_move + " down " + move[1]
+        if move[0] == 'L':
+            last_move = last_move + " left " + move[1]
+
+        return Board(new_board_str, self, self.g_of_n + 1, last_move)
 
     # returns true if the ambulance is at the exit
     def is_solution(self):
@@ -254,7 +272,30 @@ class Board:
     # removes cars at position f3 free of charge
     def valet_service(self):
         car_name = self.board_as_string[17]
-        if car_name is not '.' and car_name is not 'A':
+        car_to_be_removed = None
+        for car in self.cars:
+            if car_name == car.name:
+                car_to_be_removed = car
+
+        if car_name != '.' and car_name != 'A' and car_to_be_removed.is_horizontal:
             self.board_as_string = self.board_as_string.replace(car_name, '.')
-            print("removed car " + car_name + " --> " + self.board_as_string)
+            self.board_as_array = self.get_board_array()
+            self.cars.remove(car_to_be_removed)
+
+    def get_children(self):
+
+        children = []
+        for car in self.cars:
+            for move in car.moves:
+                child = self.get_board_given_move(move, car)
+                if child is not None:
+                    children.append(child)
+
+        for child in children:
+            if child is None:
+                children.remove(child)
+
+        children = sorted(children, key=lambda node: int('inf') if node is None else node.g_of_n)  # sort by cost
+
+        return children
 
