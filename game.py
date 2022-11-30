@@ -138,11 +138,10 @@ class Board:
         return children
 
     def is_goal_state(self):
-        goal_state = True
+        goal_state = False
         for car in self.cars:
-            if car.name == "A":
-                goal_state = False
-
+            if car.name == "A" and car.row == 2 and car.column == 1 + 5 - car.length:
+                goal_state = True
         return goal_state
 
     def new_board_after_move(self, move_car, move):
@@ -167,10 +166,10 @@ class Board:
                     new_car_pos.append((old_car_pos[i][0], old_car_pos[i][1] - int(move[1])))  # get the position of each car component after it moves
             else:  # car moving right
                 for i in range(move_car.length):
-                    new_car_pos.append((old_car_pos[i][0], old_car_pos[i][1] + int(move[1]))) # get the position of each car component after it moves
+                    new_car_pos.append((old_car_pos[i][0], old_car_pos[i][1] + int(move[1])))  # get the position of each car component after it moves
 
-                # if the column for the car's  most right index = (3,5), it exits the board (only possible for horizontal cars moving right)
-                if new_car_pos[move_car.length - 1][0] == 2 and new_car_pos[move_car.length - 1][1] == int(sqrt(self.size)) - 1:
+                # if the column for the car's most right index = (3,5) and the car is not the ambulance, it exits the board (only possible for horizontal cars moving right)
+                if new_car_pos[move_car.length - 1][0] == 2 and new_car_pos[move_car.length - 1][1] == int(sqrt(self.size)) - 1 and move_car.name != "A":
                     car_exited = True
         else:  # if car is vertical it can move up or down
             for i in range(move_car.length):
@@ -197,14 +196,14 @@ class Board:
         # for each car in the new cars list (copied)
         for car in cars:
             car.possible_moves.clear()  # clear each car's possible moves
-            if not car_exited:  # if the car is still on the board
+            if car_exited:  # if the car exited the board and car is not the ambulance, remove the car from the game
+                if car.name == move_car.name:
+                    cars.remove(car)
+            else:  # if the car is still on the board
                 if car.name == move_car.name:
                     car.fuel = car.fuel - int(move[1])  # update the car's fuel
                     car.row = new_car_pos[0][0]  # update the car's row position
                     car.column = new_car_pos[0][1]  # update the car's column position
-            else:  # if the car exited the board, remove the car from the game
-                if car.name == move_car.name:
-                    cars.remove(car)
 
         child_board = Board(None, cars, blank_spaces, size, previous_move, parent, g_n)  # initialize the new child game board
         child_board.generate_board_string()  # generate and initialize the child's board string
@@ -276,23 +275,25 @@ def initialize_game_components(game_string, board_size=36):
     game_board.find_possible_moves()
     return game_board
 
+def uniform_cost_search():
+    pass
 
-# game_board_strings = read_game_file("sample-input.txt")
-# board = initialize_game_components(game_board_strings[0])
-# print(board)
-# for car in board.cars:
-#     print(car)
-# print("======children=====")
-# children = board.get_children()
-# for child in children:
-#     print(child.parent)
-#     print("====child=====")
-#     print(child.previous_move)
-#     print("Goal state: ", child.is_goal_state())
-#     print(child)
-#     for child_car in child.cars:
-#         print(child_car)
-#
-# print("=====Parent=====")
-# for car in board.cars:
-#     print(car)
+game_board_strings = read_game_file("sample-input.txt")
+board = initialize_game_components(game_board_strings[0])
+print(board)
+for car in board.cars:
+    print(car)
+print("======children=====")
+children = board.get_children()
+for child in children:
+    print(child.parent)
+    print("====child=====")
+    print(child.previous_move)
+    print("Goal state: ", child.is_goal_state())
+    print(child)
+    for child_car in child.cars:
+        print(child_car)
+
+print("=====Parent=====")
+for car in board.cars:
+    print(car)
