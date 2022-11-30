@@ -7,6 +7,7 @@ class Board:
     # initializes the board with a string
     def __init__(self, board_as_string):
         self.board_as_string = board_as_string
+        self.valet_service()
         self.board_as_array = self.get_board_array()
         self.fuel_dictionary = self.extract_fuel()
         self.cars = self.extract_cars()
@@ -151,6 +152,10 @@ class Board:
 
         car = Car(cr.size, cr.row, cr.col, cr.is_horizontal, cr.name, cr.moves, cr.fuel)
 
+        # check for available fuel
+        if car.fuel is 0:
+            return None
+
         # copy the current board string
         new_board_str = self.board_as_string
 
@@ -159,7 +164,7 @@ class Board:
 
         if move.startswith('U'):
 
-            while not num_moves == 0 and not car.fuel == 0:
+            while not num_moves == 0:
                 # get the positions
                 u_pos_minus_1 = car.row * 6 + car.col - 6
                 d_pos = car.row * 6 + car.col + car.size*6 - 6
@@ -173,10 +178,9 @@ class Board:
                 new_board_str = new_board_str[:u_pos_minus_1] + car.name + new_board_str[u_pos_minus_1 + 1:]
 
                 car.row = car.row - 1
-                car.fuel = car.fuel - 1
         if move.startswith('R'):
 
-            while not num_moves == 0 and not car.fuel == 0:
+            while not num_moves == 0:
 
                 # get the positions
                 l_pos = car.row * 6 + car.col
@@ -191,11 +195,10 @@ class Board:
                 new_board_str = new_board_str[:r_pos_plus_1] + car.name + new_board_str[r_pos_plus_1 + 1:]
 
                 car.col = car.col + 1
-                car.fuel = car.fuel - 1
 
         if move.startswith('D'):
 
-            while not num_moves == 0 and not car.fuel == 0:
+            while not num_moves == 0:
                 # get the positions
                 u_pos = car.row * 6 + car.col
                 d_pos_plus_1 = car.row * 6 + car.col + car.size*6
@@ -209,11 +212,10 @@ class Board:
                 new_board_str = new_board_str[:d_pos_plus_1] + car.name + new_board_str[d_pos_plus_1 + 1:]
 
                 car.row = car.row + 1
-                car.fuel = car.fuel - 1
 
         if move.startswith('L'):
 
-            while not num_moves == 0 and not car.fuel == 0:
+            while not num_moves == 0:
                 # get the positions
                 l_pos_minus_1 = car.row * 6 + car.col - 1
                 r_pos = car.row * 6 + car.col + car.size - 1
@@ -227,7 +229,9 @@ class Board:
                 new_board_str = new_board_str[:l_pos_minus_1] + car.name + new_board_str[l_pos_minus_1 + 1:]
 
                 car.col = car.col - 1
-                car.fuel = car.fuel - 1
+
+        # reduce fuel by 1
+        car.fuel = car.fuel - 1
 
         # adjust the fuel consumption
         fuel_string = new_board_str[37:]
@@ -245,5 +249,12 @@ class Board:
 
     # returns true if the ambulance is at the exit
     def is_solution(self):
-        print(self.board_as_string[17])
         return self.board_as_string[17] == 'A'
+
+    # removes cars at position f3 free of charge
+    def valet_service(self):
+        car_name = self.board_as_string[17]
+        if car_name is not '.' and car_name is not 'A':
+            self.board_as_string = self.board_as_string.replace(car_name, '.')
+            print("removed car " + car_name + " --> " + self.board_as_string)
+
