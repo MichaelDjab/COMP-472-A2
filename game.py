@@ -157,7 +157,7 @@ class Board:
         # initialize child board member variables
         parent = self
         g_n = self.g_n + 1
-        previous_move = move_car.name + ": " + move
+        previous_move = previous_move = move_car.name + ": " + move
         size = self.size
         cars = deepcopy(self.cars)
         blank_spaces = deepcopy(self.blank_spaces)
@@ -285,61 +285,88 @@ def initialize_game_components(game_string, board_size=36):
     return game_board
 
 
-def uniform_cost_search(file_name):
-    initial_game_board_strings = read_game_file(file_name)
+def uniform_cost_search(game_board_string, puzzle_number):
+    initial_board = initialize_game_components(game_board_string)
+    # print("Initial board configuration:", initial_board.board_string)
+    # print("\n", initial_board, "\n")
+    # print("Car fuel available: ", end='')
+    # print(', '.join([car.name + ":" + str(car.fuel) for car in initial_board.cars]))
 
-    for game_board_string in initial_game_board_strings:
-        initial_board = initialize_game_components(game_board_string)
-        print(initial_board.board_string)
-        open_list = []
-        closed_list = []
-        goal_state_found = False
+    open_list = []
+    closed_list = []
+    goal_state_found = False
 
-        open_list.append(initial_board)
-        start = time()
-        while not goal_state_found and len(open_list) != 0:
-            open_list.sort(key=lambda x: x.g_n, reverse=False)  # check if sort works
-            if open_list[0].is_goal_state():
-                goal_state_found = True
-            else:
-                children = open_list[0].get_children()
-                for child in children:
-                    if child not in closed_list:
-                        board_in_open_list = False
-                        for board in open_list:
-                            if board.board_string == child.board_string and child.g_n >= board.g_n:
-                                board_in_open_list = True
-                                break
-                            elif board.board_string == child.board_string and child.g_n < board.g_n:
-                                board_in_open_list = True
-                                open_list.remove(board)
-                                open_list.append(child)
-                                break
-                        if not board_in_open_list:
-                            open_list.append(child)
-
-            closed_list.append(open_list.pop(0))
-        end = time()
-        if goal_state_found:
-            solution_path = []
-            goal_state = closed_list[-1]
-            solution_path.append(goal_state)
-
-            next_parent = goal_state.parent
-            while next_parent is not None:
-                solution_path.insert(0, next_parent)
-                next_parent = next_parent.parent
-
-            solution_path_string = ""
-            for node in solution_path:
-                solution_path_string += (str(node.previous_move) + " ")
-            print("Runtime: ", end - start, " seconds")
-            print("Search path length: ", len(closed_list), " states")
-            print("Solution path length: ", len(solution_path) - 1, " moves")
-            print("Solution path: ", solution_path_string)
+    open_list.append(initial_board)
+    start = time()
+    while not goal_state_found and len(open_list) != 0:
+        open_list.sort(key=lambda x: x.g_n, reverse=False)  # check if sort works
+        if open_list[0].is_goal_state():
+            goal_state_found = True
         else:
-            print("Sorry, could not solve the puzzle as specified.")
-            print("Error: no solution found")
-            print("Runtime: ", end - start, " seconds")
+            children = open_list[0].get_children()
+            for child in children:
+                if child not in closed_list:
+                    board_in_open_list = False
+                    for board in open_list:
+                        if board.board_string == child.board_string and child.g_n >= board.g_n:
+                            board_in_open_list = True
+                            break
+                        elif board.board_string == child.board_string and child.g_n < board.g_n:
+                            board_in_open_list = True
+                            open_list.remove(board)
+                            open_list.append(child)
+                            break
+                    if not board_in_open_list:
+                        open_list.append(child)
 
-uniform_cost_search("sample-input.txt")
+        closed_list.append(open_list.pop(0))
+    end = time()
+    runtime = round(end - start, 2)
+    if goal_state_found:
+        solution_path = []
+        goal_state = closed_list[-1]
+        solution_path.append(goal_state)
+
+        next_parent = goal_state.parent
+        while next_parent.parent is not None:
+            solution_path.insert(0, next_parent)
+            next_parent = next_parent.parent
+
+        create_solution_file("ucs", puzzle_number, initial_board, runtime, True, closed_list, solution_path)
+    else:
+        create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
+    #     print("Runtime:", round(end - start, 2), "seconds")
+    #     print("Search path length:", len(closed_list), "states")
+    #     print("Solution path length:", len(solution_path), "moves")
+    #     print("Solution path:", '; '.join([node.previous_move for node in solution_path]))
+    #     for node in solution_path:
+    #         print(f"{node.previous_move}\t{[car.fuel for car in node.cars if car.name == node.previous_move[0]][0]} {node.board_string}")
+    #     print(goal_state)
+    # else:
+    #     print("Sorry, could not solve the puzzle as specified.")
+    #     print("Error: no solution found")
+    #     print("Runtime:", round(end - start, 2), "seconds")
+
+
+def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, found_goal_state, search_path=None, solution_path=None):
+    with open(f"{algorithm_name}-sol-{puzzle_number}", "w") as file:
+        file.write(f"Initial board configuration: {initial_board.board_string}\n")
+        file.write(f"\n{str(initial_board)}\n")
+        file.write("Car fuel available: ")
+        file.write(', '.join([car.name + ":" + str(car.fuel) for car in initial_board.cars]) + "\n\n")
+
+        if found_goal_state:
+            file.write(f"Runtime: {runtime} seconds\n")
+            file.write(f"Search path length: {len(search_path)} states\n")
+            file.write(f"Solution path length: {len(solution_path)} moves\n")
+            file.write(f"Solution path: {'; '.join([node.previous_move for node in solution_path if node.previous_move])}\n\n")
+            for node in solution_path:
+                file.write(f"{node.previous_move}\t{[car.fuel for car in node.cars if car.name == node.previous_move[0]][0]} {node.board_string}\n")
+            file.write(f"\n{solution_path[-1]}")
+        else:
+            file.write("Sorry, could not solve the puzzle as specified.\n")
+            file.write("Error: no solution found\n")
+            file.write(f"Runtime: {runtime} seconds")
+
+
+uniform_cost_search("BB.G.HE..G.HEAAG.I..FCCIDDF..I..F... ", 6)
