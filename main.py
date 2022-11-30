@@ -4,6 +4,7 @@ from random import random
 from Car import Car
 from Board import Board
 from Uniform_cost_search import UniformCostSearch
+import time
 
 
 def main():
@@ -33,11 +34,11 @@ def main():
 
                     if len(opened_list) == 1:
                         stop_loop = True
-                    else:
+
+                    if len(opened_list) > 1:
+                        current_node = opened_list[1]
                         del opened_list[0]
 
-                    if len(opened_list) > 0:
-                        current_node = opened_list[0]
                     continue
 
             # add current node's children to the open list (already sorted)
@@ -78,7 +79,11 @@ def main():
         print()
         board.show_board()
 
+        t0 = time.time()
         do_uniform_cost_search(board)
+        t1 = time.time()
+
+        print(str(t1-t0) + " Seconds")
 
 
 main()
