@@ -1,5 +1,6 @@
 from math import sqrt
 from copy import deepcopy
+from time import time
 
 
 class Car:
@@ -16,6 +17,10 @@ class Car:
         return "Car " + self.name + ": row=" + str(self.row) + ", column=" + str(
             self.column) + ", is_horizontal=" + str(self.is_horizontal) + ", length=" + str(
             self.length) + ", possible_moves=" + str(self.possible_moves) + ", fuel=" + str(self.fuel)
+
+    def __eq__(self, other):
+        assert isinstance(other, Car)
+        return self.name == other.name
 
 
 class Board:
@@ -37,6 +42,10 @@ class Board:
                 board_string_2d += self.board_string[i]
 
         return board_string_2d
+
+    def __eq__(self, other):
+        assert isinstance(other, Board)
+        return self.board_string == other.board_string
 
     def generate_board_string(self):
         game_string = [None] * self.size
@@ -275,25 +284,62 @@ def initialize_game_components(game_string, board_size=36):
     game_board.find_possible_moves()
     return game_board
 
-def uniform_cost_search():
-    pass
 
-game_board_strings = read_game_file("sample-input.txt")
-board = initialize_game_components(game_board_strings[0])
-print(board)
-for car in board.cars:
-    print(car)
-print("======children=====")
-children = board.get_children()
-for child in children:
-    print(child.parent)
-    print("====child=====")
-    print(child.previous_move)
-    print("Goal state: ", child.is_goal_state())
-    print(child)
-    for child_car in child.cars:
-        print(child_car)
+def uniform_cost_search(file_name):
+    initial_game_board_strings = read_game_file(file_name)
 
-print("=====Parent=====")
-for car in board.cars:
-    print(car)
+    for game_board_string in initial_game_board_strings:
+        initial_board = initialize_game_components(game_board_string)
+        print(initial_board.board_string)
+        open_list = []
+        closed_list = []
+        goal_state_found = False
+
+        open_list.append(initial_board)
+        start = time()
+        while not goal_state_found and len(open_list) != 0:
+            open_list.sort(key=lambda x: x.g_n, reverse=False)  # check if sort works
+            if open_list[0].is_goal_state():
+                goal_state_found = True
+            else:
+                children = open_list[0].get_children()
+                for child in children:
+                    if child not in closed_list:
+                        board_in_open_list = False
+                        for board in open_list:
+                            if board.board_string == child.board_string and child.g_n >= board.g_n:
+                                board_in_open_list = True
+                                break
+                            elif board.board_string == child.board_string and child.g_n < board.g_n:
+                                board_in_open_list = True
+                                open_list.remove(board)
+                                open_list.append(child)
+                                break
+                        if not board_in_open_list:
+                            open_list.append(child)
+
+            closed_list.append(open_list.pop(0))
+        end = time()
+        if goal_state_found:
+            solution_path = []
+            goal_state = closed_list[-1]
+            solution_path.append(goal_state)
+
+            next_parent = goal_state.parent
+            while next_parent is not None:
+                solution_path.insert(0, next_parent)
+                next_parent = next_parent.parent
+
+            solution_path_string = ""
+            for node in solution_path:
+                solution_path_string += (str(node.previous_move) + " ")
+            print("Runtime: ", end - start, " seconds")
+            print("Search path length: ", len(closed_list), " states")
+            print("Solution path length: ", len(solution_path) - 1, " moves")
+            print("Solution path: ", solution_path_string)
+        else:
+            print("Sorry, could not solve the puzzle as specified.")
+            print("Error: no solution found")
+            print("Runtime: ", end - start, " seconds")
+
+uniform_cost_search("sample-input.txt")
