@@ -24,7 +24,7 @@ class Car:
 
 
 class Board:
-    def __init__(self, board_string, cars, blank_spaces, size, previous_move, parent, g_n):
+    def __init__(self, board_string, cars, blank_spaces, size, previous_move, parent, g_n, h_n=0):
         self.board_string = board_string
         self.cars = cars
         self.blank_spaces = blank_spaces
@@ -32,6 +32,7 @@ class Board:
         self.previous_move = previous_move
         self.parent = parent
         self.g_n = g_n
+        self.h_n = h_n
 
     def __repr__(self):
         board_string_2d = ""
@@ -47,6 +48,7 @@ class Board:
         assert isinstance(other, Board)
         return self.board_string == other.board_string
 
+    # generate and set the string representation of the board
     def generate_board_string(self):
         game_string = [None] * self.size
 
@@ -63,7 +65,7 @@ class Board:
 
         self.board_string = ''.join(game_string)
 
-    # given a board, find all possible moves of each car
+    # given a board, find and set all possible moves of each car
     def find_possible_moves(self):
         for car in self.cars:
             if car.is_horizontal:  # if the car is horizontal it can only move left and right
@@ -138,6 +140,7 @@ class Board:
                     else:  # once a non-blank space is reached, the car can no longer move in that direction
                         break
 
+    # return the list of children for a given board
     def get_children(self):
         children = []
         for car in self.cars:
@@ -146,13 +149,15 @@ class Board:
 
         return children
 
+    # return true if board is a goal state
     def is_goal_state(self):
         goal_state = False
         for car in self.cars:
-            if car.name == "A" and car.row == 2 and car.column == 1 + 5 - car.length:
+            if car.name == "A" and car.row == 2 and car.column == 1 + 5 - car.length:  # if the ambulance's last column index is at the exit
                 goal_state = True
         return goal_state
 
+    # helper function for get_children() - given a board, car and move, return the new board
     def new_board_after_move(self, move_car, move):
         # initialize child board member variables
         parent = self
@@ -220,6 +225,7 @@ class Board:
         return child_board
 
 
+# read a game file and return a list of game strings
 def read_game_file(file_name):
     with open(file_name) as file:
         lines = file.read().splitlines()
@@ -233,7 +239,7 @@ def read_game_file(file_name):
     return game_strings
 
 
-# given a game string and board size, returns the corresponding fully initialized board
+# given a game string and board size, returns the corresponding fully initialized board with its initialized cars
 def initialize_game_components(game_string, board_size=36):
     cars = []  # list of car objects
     blank_spaces = []  # list of tuple coordinates to blank spaces
@@ -285,69 +291,62 @@ def initialize_game_components(game_string, board_size=36):
     return game_board
 
 
+# performs uniform cost search on the give game_board_string and creates corresponding output files
 def uniform_cost_search(game_board_string, puzzle_number):
     initial_board = initialize_game_components(game_board_string)
-    # print("Initial board configuration:", initial_board.board_string)
-    # print("\n", initial_board, "\n")
-    # print("Car fuel available: ", end='')
-    # print(', '.join([car.name + ":" + str(car.fuel) for car in initial_board.cars]))
 
     open_list = []
     closed_list = []
     goal_state_found = False
 
-    open_list.append(initial_board)
-    start = time()
-    while not goal_state_found and len(open_list) != 0:
-        open_list.sort(key=lambda x: x.g_n, reverse=False)  # check if sort works
-        if open_list[0].is_goal_state():
+    open_list.append(initial_board)  # append the initial board to the open list
+    start = time()  # start algorithm time
+    while not goal_state_found and len(open_list) != 0:  # continue to search children if the goal state is not found and the open list is not 0
+        open_list.sort(key=lambda x: x.g_n, reverse=False)  # sort the open list by g(n) ascending
+        if open_list[0].is_goal_state():  # if the lowest cost node is the goal state
             goal_state_found = True
-        else:
-            children = open_list[0].get_children()
+        else:  # if the lowest cost node is not the goal state
+            children = open_list[0].get_children()  # create the node's children
             for child in children:
-                if child not in closed_list:
+                if child not in closed_list:  # if the child is not already in the closed list (not visited)
                     board_in_open_list = False
-                    for board in open_list:
-                        if board.board_string == child.board_string and child.g_n >= board.g_n:
+                    for board in open_list:  # check if child is already in the open list
+                        if board.board_string == child.board_string and child.g_n >= board.g_n:  # if the child is in the open list with a greater cost, do not add it to the open list
                             board_in_open_list = True
                             break
-                        elif board.board_string == child.board_string and child.g_n < board.g_n:
+                        elif board.board_string == child.board_string and child.g_n < board.g_n:  # if the child is in the open list with a lower cost, replace the old node with the child
                             board_in_open_list = True
                             open_list.remove(board)
                             open_list.append(child)
                             break
-                    if not board_in_open_list:
+                    if not board_in_open_list:  # if the child is not in the open list, append it to the open list
                         open_list.append(child)
 
-        closed_list.append(open_list.pop(0))
-    end = time()
-    runtime = round(end - start, 2)
-    if goal_state_found:
+        closed_list.append(open_list.pop(0))  # pop the visited node and add it to the closed list
+
+    end = time()  # when out of the search, stop the end time
+    runtime = round(end - start, 2)  # calculate the runtime
+    if goal_state_found:  # if the goal state was found, calculate the solution path
         solution_path = []
-        goal_state = closed_list[-1]
+        goal_state = closed_list[-1]  # the goal state is the last node in the closed list
         solution_path.append(goal_state)
 
         next_parent = goal_state.parent
-        while next_parent.parent is not None:
+        while next_parent.parent is not None:  # append each parent from the goal_state to the solution path list
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
+        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
         create_solution_file("ucs", puzzle_number, initial_board, runtime, True, closed_list, solution_path)
-    else:
+    else:  # goal state was not found
+        # if the goal_state was not found, write limited solution information to the solution file
         create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
-    #     print("Runtime:", round(end - start, 2), "seconds")
-    #     print("Search path length:", len(closed_list), "states")
-    #     print("Solution path length:", len(solution_path), "moves")
-    #     print("Solution path:", '; '.join([node.previous_move for node in solution_path]))
-    #     for node in solution_path:
-    #         print(f"{node.previous_move}\t{[car.fuel for car in node.cars if car.name == node.previous_move[0]][0]} {node.board_string}")
-    #     print(goal_state)
-    # else:
-    #     print("Sorry, could not solve the puzzle as specified.")
-    #     print("Error: no solution found")
-    #     print("Runtime:", round(end - start, 2), "seconds")
+
+    # create and write search information to the search file
+    create_search_file("ucs", puzzle_number, closed_list)
 
 
+# creates and writes to a solution file
 def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, found_goal_state, search_path=None, solution_path=None):
     with open(f"{algorithm_name}-sol-{puzzle_number}", "w") as file:
         file.write(f"Initial board configuration: {initial_board.board_string}\n")
@@ -369,4 +368,13 @@ def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, 
             file.write(f"Runtime: {runtime} seconds")
 
 
-uniform_cost_search("BB.G.HE..G.HEAAG.I..FCCIDDF..I..F... ", 6)
+# creates and writes to a search file
+def create_search_file(algorithm_name, puzzle_number, search_path):
+    with open(f"{algorithm_name}-search-{puzzle_number}", "w") as file:
+        for node in search_path:
+            file.write(f"{node.g_n + node.h_n} {node.g_n} {node.h_n} {node.board_string}\n")
+
+
+
+
+
