@@ -1,6 +1,7 @@
 from math import sqrt
 from copy import deepcopy
 from time import time
+import pandas as pd
 
 
 class Car:
@@ -425,9 +426,11 @@ def uniform_cost_search(game_board_string, puzzle_number):
         closed_list.append(open_list.pop(0))  # pop the visited node and add it to the closed list
 
     end = time()  # when out of the search, stop the end time
+
     runtime = round(end - start, 2)  # calculate the runtime
+    solution_path = []
+
     if goal_state_found:  # if the goal state was found, calculate the solution path
-        solution_path = []
         goal_state = closed_list[-1]  # the goal state is the last node in the closed list
         solution_path.append(goal_state)
 
@@ -436,22 +439,32 @@ def uniform_cost_search(game_board_string, puzzle_number):
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
-        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-        create_solution_file("ucs", puzzle_number, initial_board, runtime, True, search_path=closed_list, solution_path=solution_path)
-    else:  # goal state was not found
-        # if the goal_state was not found, write limited solution information to the solution file
-        create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
+    #         # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
+    #         create_solution_file("ucs", puzzle_number, initial_board, runtime, True, search_path=closed_list, solution_path=solution_path)
+    # else:  # goal state was not found
+    #     # if the goal_state was not found, write limited solution information to the solution file
+    #     create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
+    #
+    #     # create and write search information to the search file
+    #     create_search_file("ucs", puzzle_number, closed_list)
 
-    # create and write search information to the search file
-    create_search_file("ucs", puzzle_number, closed_list)
+    return {"puzzle_number": puzzle_number,
+            "algorithm_name": "ucs",
+            "heuristic_number": None,
+            "solution_path": solution_path,
+            "search_path": closed_list,
+            "runtime": runtime,
+            "game_board_string": game_board_string,
+            "initial_board": initial_board,
+            "goal_state_found": goal_state_found}
 
 
-def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
+def greedy_best_first_search(game_board_string, puzzle_number, heuristic_number):
     initial_board = initialize_game_components(game_board_string)
     heuristic = None
 
     # set heuristic function based on passed heuristic_num
-    match heuristic_num:
+    match heuristic_number:
         case 1:
             heuristic = Board.heuristic_1
         case 2:
@@ -496,6 +509,8 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
 
     end = time()  # when out of the search, stop the end time
     runtime = round(end - start, 2)  # calculate the runtime
+    solution_path = []
+
     if goal_state_found:  # if the goal state was found, calculate the solution path
         solution_path = []
         goal_state = closed_list[-1]  # the goal state is the last node in the closed list
@@ -507,21 +522,30 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
             next_parent = next_parent.parent
 
         # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-        create_solution_file("gbfs", puzzle_number, initial_board, runtime, True, heuristic_num, closed_list, solution_path)
-    else:  # goal state was not found
-        # if the goal_state was not found, write limited solution information to the solution file
-        create_solution_file("gbfs", puzzle_number, initial_board, runtime, False, heuristic_num)
+    #     create_solution_file("gbfs", puzzle_number, initial_board, runtime, True, heuristic_number, closed_list, solution_path)
+    # else:  # goal state was not found
+    #     # if the goal_state was not found, write limited solution information to the solution file
+    #     create_solution_file("gbfs", puzzle_number, initial_board, runtime, False, heuristic_number)
+    #
+    # # create and write search information to the search file
+    # create_search_file("gbfs", puzzle_number, closed_list, heuristic_number)
+    return {"puzzle_number": puzzle_number,
+            "algorithm_name": "gbfs",
+            "heuristic_number": heuristic_number,
+            "solution_path": solution_path,
+            "search_path": closed_list,
+            "runtime": runtime,
+            "game_board_string": game_board_string,
+            "initial_board": initial_board,
+            "goal_state_found": goal_state_found}
 
-    # create and write search information to the search file
-    create_search_file("gbfs", puzzle_number, closed_list,heuristic_num)
 
-
-def algorithm_a(game_board_string, puzzle_number, heuristic_num):
+def algorithm_a(game_board_string, puzzle_number, heuristic_number):
     initial_board = initialize_game_components(game_board_string)
     heuristic = None
 
     # set heuristic function based on passed heuristic_num
-    match heuristic_num:
+    match heuristic_number:
         case 1:
             heuristic = Board.heuristic_1
         case 2:
@@ -567,6 +591,8 @@ def algorithm_a(game_board_string, puzzle_number, heuristic_num):
 
     end = time()  # when out of the search, stop the end time
     runtime = round(end - start, 2)  # calculate the runtime
+    solution_path = []
+
     if goal_state_found:  # if the goal state was found, calculate the solution path
         solution_path = []
         goal_state = closed_list[-1]  # the goal state is the last node in the closed list
@@ -577,23 +603,32 @@ def algorithm_a(game_board_string, puzzle_number, heuristic_num):
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
-        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-        create_solution_file("a", puzzle_number, initial_board, runtime, True, heuristic_num, closed_list, solution_path)
-    else:  # goal state was not found
-        # if the goal_state was not found, write limited solution information to the solution file
-        create_solution_file("a", puzzle_number, initial_board, runtime, False, heuristic_num)
-
-    # create and write search information to the search file
-    create_search_file("a", puzzle_number, closed_list,heuristic_num)
+    #     # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
+    #     create_solution_file("a", puzzle_number, initial_board, runtime, True, heuristic_number, closed_list, solution_path)
+    # else:  # goal state was not found
+    #     # if the goal_state was not found, write limited solution information to the solution file
+    #     create_solution_file("a", puzzle_number, initial_board, runtime, False, heuristic_number)
+    #
+    # # create and write search information to the search file
+    # create_search_file("a", puzzle_number, closed_list, heuristic_number)
+    return {"puzzle_number": puzzle_number,
+            "algorithm_name": "a",
+            "heuristic_number": heuristic_number,
+            "solution_path": solution_path,
+            "search_path": closed_list,
+            "runtime": runtime,
+            "game_board_string": game_board_string,
+            "initial_board": initial_board,
+            "goal_state_found": goal_state_found}
 
 
 # creates and writes to a solution file
-def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, found_goal_state, heuristic_number=None, search_path=None, solution_path=None):
+def create_solution_file(algorithm_name, puzzle_number, initial_board, game_board_string, runtime, found_goal_state, heuristic_number=None, search_path=None, solution_path=None):
     file_name = f"{algorithm_name}-sol-{puzzle_number}"
     if heuristic_number:
         file_name = f"{algorithm_name}-h{heuristic_number}-sol-{puzzle_number}"
     with open(file_name, "w") as file:
-        file.write(f"Initial board configuration: {initial_board.board_string}\n")
+        file.write(f"Initial board configuration: {game_board_string}\n")
         file.write(f"\n{str(initial_board)}\n")
         file.write("Car fuel available: ")
         file.write(', '.join([car.name + ":" + str(car.fuel) for car in initial_board.cars]) + "\n\n")
@@ -622,6 +657,83 @@ def create_search_file(algorithm_name, puzzle_number, search_path, heuristic_num
             file.write(f"{node.g_n + node.h_n} {node.g_n} {node.h_n} {node.board_string}\n")
 
 
+def create_data_frame(puzzle_number, algorithm_name, heuristic_number, solution_path_length, search_path_length, execution_time):
+    data = []
 
 
+def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False, create_output_files=False, create_excel_file=False):
+    game_strings = read_game_file(game_file)
+    data = []
+    puzzle_number = 0
+    for game_string in game_strings:
+        puzzle_number += 1
+
+        if with_ucs:
+            game_info = uniform_cost_search(game_string, puzzle_number)
+            if create_output_files:
+                create_solution_file(game_info["algorithm_name"],
+                                     game_info["puzzle_number"],
+                                     game_info["initial_board"],
+                                     game_info["game_board_string"],
+                                     game_info["runtime"],
+                                     game_info["goal_state_found"],
+                                     game_info["heuristic_number"],
+                                     game_info["search_path"],
+                                     game_info["solution_path"])
+
+                create_search_file(game_info["algorithm_name"],
+                                   game_info["puzzle_number"],
+                                   game_info["search_path"],
+                                   game_info["heuristic_number"])
+
+            if create_excel_file:
+                pass
+
+        if with_gbfs:
+            # h1_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=1)
+            # h2_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=2)
+            # h3_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=3)
+            # h4_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=4)
+            for i in range(1, 5):
+                game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=i)
+                if create_output_files:
+                    create_solution_file(game_info["algorithm_name"],
+                                         game_info["puzzle_number"],
+                                         game_info["initial_board"],
+                                         game_info["game_board_string"],
+                                         game_info["runtime"],
+                                         game_info["goal_state_found"],
+                                         game_info["heuristic_number"],
+                                         game_info["search_path"],
+                                         game_info["solution_path"])
+
+                    create_search_file(game_info["algorithm_name"],
+                                       game_info["puzzle_number"],
+                                       game_info["search_path"],
+                                       game_info["heuristic_number"])
+
+                if create_excel_file:
+                    pass
+
+        if with_algo_a:
+            for i in range(1, 5):
+                game_info = algorithm_a(game_string, puzzle_number, heuristic_number=i)
+                if create_output_files:
+                    create_solution_file(game_info["algorithm_name"],
+                                         game_info["puzzle_number"],
+                                         game_info["initial_board"],
+                                         game_info["game_board_string"],
+                                         game_info["runtime"],
+                                         game_info["goal_state_found"],
+                                         game_info["heuristic_number"],
+                                         game_info["search_path"],
+                                         game_info["solution_path"])
+
+                    create_search_file(game_info["algorithm_name"],
+                                       game_info["puzzle_number"],
+                                       game_info["search_path"],
+                                       game_info["heuristic_number"])
+
+                if create_excel_file:
+                    pass
 
