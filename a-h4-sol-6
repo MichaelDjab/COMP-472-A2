@@ -1,0 +1,56 @@
+Initial board configuration: BB.G.HE..G.HEAAG.I..FCCIDDF..I..F...
+
+BB.G.H
+E..G.H
+EAAG.I
+..FCCI
+DDF..I
+..F...
+
+Car fuel available: B:100, G:100, H:100, E:100, A:100, I:100, F:100, C:100, D:100
+
+Runtime: 0.59 seconds
+Search path length: 616 states
+Solution path length: 33 moves
+Solution path: B: R1; E: U1; A: L1; F: U2; D: R3; F: D2; A: R1; E: D4; B: L1; I: D1; H: D1; A: L1; F: U3; C: L3; G: D1; F: D1; B: R4; G: U1; F: U1; C: R3; F: D3; A: R1; E: U4; A: L1; F: U3; C: L3; D: L3; G: D3; F: D3; A: R3; B: L1; H: U1; A: R1
+
+B: R1	99 .BBG.HE..G.HEAAG.I..FCCIDDF..I..F...
+E: U1	99 EBBG.HE..G.H.AAG.I..FCCIDDF..I..F...
+A: L1	99 EBBG.HE..G.HAA.G.I..FCCIDDF..I..F...
+F: U2	98 EBBG.HE.FG.HAAFG.I..FCCIDD...I......
+D: R3	97 EBBG.HE.FG.HAAFG.I..FCCI...DDI......
+F: D2	96 EBBG.HE..G.HAA.G.I..FCCI..FDDI..F...
+A: R1	98 EBBG.HE..G.H.AAG.I..FCCI..FDDI..F...
+E: D4	95 .BBG.H...G.H.AAG.I..FCCIE.FDDIE.F...
+B: L1	98 BB.G.H...G.H.AAG.I..FCCIE.FDDIE.F...
+I: D1	99 BB.G.H...G.H.AAG....FCCIE.FDDIE.F..I
+H: D1	99 BB.G.....G.H.AAG.H..FCCIE.FDDIE.F..I
+A: L1	97 BB.G.....G.HAA.G.H..FCCIE.FDDIE.F..I
+F: U3	93 BBFG....FG.HAAFG.H...CCIE..DDIE....I
+C: L3	97 BBFG....FG.HAAFG.HCC...IE..DDIE....I
+G: D1	99 BBF.....FG.HAAFG.HCC.G.IE..DDIE....I
+F: D1	92 BB......FG.HAAFG.HCCFG.IE..DDIE....I
+B: R4	94 ....BB..FG.HAAFG.HCCFG.IE..DDIE....I
+G: U1	98 ...GBB..FG.HAAFG.HCCF..IE..DDIE....I
+F: U1	91 ..FGBB..FG.HAAFG.HCC...IE..DDIE....I
+C: R3	94 ..FGBB..FG.HAAFG.H...CCIE..DDIE....I
+F: D3	88 ...GBB...G.HAA.G.H..FCCIE.FDDIE.F..I
+A: R1	96 ...GBB...G.H.AAG.H..FCCIE.FDDIE.F..I
+E: U4	91 E..GBBE..G.H.AAG.H..FCCI..FDDI..F..I
+A: L1	95 E..GBBE..G.HAA.G.H..FCCI..FDDI..F..I
+F: U3	85 E.FGBBE.FG.HAAFG.H...CCI...DDI.....I
+C: L3	91 E.FGBBE.FG.HAAFG.HCC...I...DDI.....I
+D: L3	94 E.FGBBE.FG.HAAFG.HCC...IDD...I.....I
+G: D3	95 E.F.BBE.F..HAAF..HCC.G.IDD.G.I...G.I
+F: D3	82 E...BBE....HAA...HCCFG.IDDFG.I..FG.I
+A: R3	92 E...BBE....H...AAHCCFG.IDDFG.I..FG.I
+B: L1	93 E..BB.E....H...AAHCCFG.IDDFG.I..FG.I
+H: U1	98 E..BBHE....H...AA.CCFG.IDDFG.I..FG.I
+A: R1	91 E..BBHE....H....AACCFG.IDDFG.I..FG.I
+
+E..BBH
+E....H
+....AA
+CCFG.I
+DDFG.I
+..FG.I

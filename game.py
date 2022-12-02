@@ -450,6 +450,7 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
     initial_board = initialize_game_components(game_board_string)
     heuristic = None
 
+    # set heuristic function based on passed heuristic_num
     match heuristic_num:
         case 1:
             heuristic = Board.heuristic_1
@@ -460,7 +461,7 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
         case 4:
             heuristic = Board.heuristic_4
 
-    heuristic(initial_board)  # set heuristic given passed heuristic function
+    heuristic(initial_board)  # set heuristic using passed heuristic function
 
     open_list = []
     closed_list = []
@@ -476,7 +477,7 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
             children = open_list[0].get_children()  # create the node's children
             for child in children:
                 if child not in open_list and child not in closed_list:  # if the child is not already in the closed list (not visited)
-                    heuristic(child)
+                    heuristic(child)  # apply the heuristic on the child before appending to the open list
                     open_list.append(child)
                     # board_in_open_list = False
                     # for board in open_list:  # check if child is already in the open list
@@ -513,6 +514,77 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
 
     # create and write search information to the search file
     create_search_file("gbfs", puzzle_number, closed_list,heuristic_num)
+
+
+def algorithm_a(game_board_string, puzzle_number, heuristic_num):
+    initial_board = initialize_game_components(game_board_string)
+    heuristic = None
+
+    # set heuristic function based on passed heuristic_num
+    match heuristic_num:
+        case 1:
+            heuristic = Board.heuristic_1
+        case 2:
+            heuristic = Board.heuristic_2
+        case 3:
+            heuristic = Board.heuristic_3
+        case 4:
+            heuristic = Board.heuristic_4
+
+    heuristic(initial_board)  # set heuristic using passed heuristic function
+
+    open_list = []
+    closed_list = []
+    goal_state_found = False
+
+    open_list.append(initial_board)  # append the initial board to the open list
+    start = time()  # start algorithm time
+    while not goal_state_found and len(open_list) != 0:  # continue to search children if the goal state is not found and the open list is not 0
+        open_list.sort(key=lambda x: x.g_n + x.h_n, reverse=False)  # sort the open list by f(n) ascending
+        if open_list[0].is_goal_state():  # if the lowest f(n) node is the goal state
+            goal_state_found = True
+        else:  # if the lowest f(n) node is not the goal state
+            children = open_list[0].get_children()  # create the node's children
+            for child in children:
+                if child not in closed_list:  # if the child is not already in the closed list (not visited)
+                    child.g_n = child.parent.g_n + 1
+                    board_in_open_list = False
+                    for board in open_list:  # check if child is already in the open list
+                        if board.board_string == child.board_string and child.g_n >= board.g_n:  # if the child is in the open list with a greater cost, do not add it to the open list
+                            board_in_open_list = True
+                            break
+                        elif board.board_string == child.board_string and child.g_n < board.g_n:  # if the child is in the open list with a lower cost, replace the old node with the child
+                            board_in_open_list = True
+                            open_list.remove(board)
+                            heuristic(child)  # apply the heuristic on the child before appending to the open list
+                            open_list.append(child)
+                            break
+                    if not board_in_open_list:  # if the child is not in the open list, append it to the open list
+                        heuristic(child)  # apply the heuristic on the child before appending to the open list
+                        open_list.append(child)
+
+        closed_list.append(open_list.pop(0))  # pop the visited node and add it to the closed list
+
+    end = time()  # when out of the search, stop the end time
+    runtime = round(end - start, 2)  # calculate the runtime
+    if goal_state_found:  # if the goal state was found, calculate the solution path
+        solution_path = []
+        goal_state = closed_list[-1]  # the goal state is the last node in the closed list
+        solution_path.append(goal_state)
+
+        next_parent = goal_state.parent
+        while next_parent.parent is not None:  # append each parent from the goal_state to the solution path list
+            solution_path.insert(0, next_parent)
+            next_parent = next_parent.parent
+
+        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
+        create_solution_file("a", puzzle_number, initial_board, runtime, True, heuristic_num, closed_list, solution_path)
+    else:  # goal state was not found
+        # if the goal_state was not found, write limited solution information to the solution file
+        create_solution_file("a", puzzle_number, initial_board, runtime, False, heuristic_num)
+
+    # create and write search information to the search file
+    create_search_file("a", puzzle_number, closed_list,heuristic_num)
 
 
 # creates and writes to a solution file

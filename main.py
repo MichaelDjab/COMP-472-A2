@@ -34,6 +34,30 @@ def main():
         puzzle_count += 1
         game.greedy_best_first_search(game_string, puzzle_count, 4)
 
+    # H1: A* algorithm
+    puzzle_count = 0
+    for game_string in game_strings:
+        puzzle_count += 1
+        game.algorithm_a(game_string, puzzle_count, 1)
+
+    # H2: A* algorithm
+    puzzle_count = 0
+    for game_string in game_strings:
+        puzzle_count += 1
+        game.algorithm_a(game_string, puzzle_count, 2)
+
+    # H3: A* algorithm
+    puzzle_count = 0
+    for game_string in game_strings:
+        puzzle_count += 1
+        game.algorithm_a(game_string, puzzle_count, 3)
+
+    # H4: A* algorithm
+    puzzle_count = 0
+    for game_string in game_strings:
+        puzzle_count += 1
+        game.algorithm_a(game_string, puzzle_count, 4)
+
 
 if __name__ == "__main__":
     main()
