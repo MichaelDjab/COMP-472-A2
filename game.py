@@ -24,7 +24,7 @@ class Car:
 
 
 class Board:
-    def __init__(self, board_string, cars, blank_spaces, size, previous_move, parent, g_n, h_n=0):
+    def __init__(self, board_string, cars, blank_spaces, size, previous_move, parent, g_n=0, h_n=0):
         self.board_string = board_string
         self.cars = cars
         self.blank_spaces = blank_spaces
@@ -161,7 +161,6 @@ class Board:
     def new_board_after_move(self, move_car, move):
         # initialize child board member variables
         parent = self
-        g_n = self.g_n + 1
         previous_move = previous_move = move_car.name + ": " + move
         size = self.size
         cars = deepcopy(self.cars)
@@ -219,10 +218,110 @@ class Board:
                     car.row = new_car_pos[0][0]  # update the car's row position
                     car.column = new_car_pos[0][1]  # update the car's column position
 
-        child_board = Board(None, cars, blank_spaces, size, previous_move, parent, g_n)  # initialize the new child game board
+        child_board = Board(None, cars, blank_spaces, size, previous_move, parent)  # initialize the new child game board
         child_board.generate_board_string()  # generate and initialize the child's board string
         child_board.find_possible_moves()  # update each car's possible move list with a new set of moves
         return child_board
+
+    def num_of_blocking_positions(self):
+        # a_car = None
+        # pos_between_a_and_exit = []
+        #
+        # for car in self.cars:
+        #     if car.name == "A":
+        #         a_car = car
+        #         break
+        #
+        # num_of_pos_between_a_and_exit = 5 - (a_car.column + a_car.length - 1)
+        # for i in range(num_of_pos_between_a_and_exit):
+        #     pos_between_a_and_exit.append((a_car.row, a_car.column + a_car.length + i))
+        #
+        # num_of_blocked_pos_between_a_and_exit = num_of_pos_between_a_and_exit
+        #
+        # for pos in pos_between_a_and_exit:
+        #     if pos in self.blank_spaces:
+        #         num_of_blocked_pos_between_a_and_exit -= 1
+        #
+        # return num_of_blocked_pos_between_a_and_exit
+
+        a_car = None
+        for car in self.cars:
+            if car.name == "A":
+                a_car = car
+                break
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
+
+        num_of_blocked_pos_between_a_and_exit = 0
+        for char in characters_after_a:
+            if char != ".":
+                num_of_blocked_pos_between_a_and_exit += 1
+
+        return num_of_blocked_pos_between_a_and_exit
+
+    def num_of_blocking_cars(self):
+        # a_car = None
+        # for car in self.cars:
+        #     if car.name == "A":
+        #         a_car = car
+        #         break
+        #
+        # number_of_block_positions = self.num_of_blocking_positions()
+        # blocking_car_count = 0
+        #
+        # for car in self.cars:
+        #     if car.is_horizontal and car.row == 2 and car.column > a_car.column + a_car.length -1:
+        #         blocking_car_count += 1
+        #         number_of_block_positions -= car.length
+        #         if number_of_block_positions == 0:
+        #             break
+        #
+        #     else:
+        #         if car.row == 2:
+        #             blocking_car_count += 1
+        #             number_of_block_positions -= 1
+        #             if number_of_block_positions == 0:
+        #                 break
+        #         elif car.row < 2 and (car.row + car.length - 1) >= 2:
+        #             blocking_car_count += 1
+        #             number_of_block_positions -= 1
+        #             if number_of_block_positions == 0:
+        #                 break
+        # return blocking_car_count
+        a_car = None
+        for car in self.cars:
+            if car.name == "A":
+                a_car = car
+                break
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
+        unique_characters_after_a = set(characters_after_a)
+
+        blocking_cars_count = 0
+        for char in unique_characters_after_a:
+            if char != ".":
+                blocking_cars_count += 1
+        return blocking_cars_count
+
+    def num_of_spaces(self):
+        a_car = None
+        for car in self.cars:
+            if car.name == "A":
+                a_car = car
+                break
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
+
+        return len(characters_after_a)
+
+    def heuristic_1(self):
+        self.h_n = self.num_of_blocking_cars()
+
+    def heuristic_2(self):
+        self.h_n = self.num_of_blocking_positions()
+
+    def heuristic_3(self):
+        self.h_n = 5 * self.num_of_blocking_cars()
+
+    def heuristic_4(self):
+        self.h_n = self.num_of_spaces()
 
 
 # read a game file and return a list of game strings
@@ -309,6 +408,7 @@ def uniform_cost_search(game_board_string, puzzle_number):
             children = open_list[0].get_children()  # create the node's children
             for child in children:
                 if child not in closed_list:  # if the child is not already in the closed list (not visited)
+                    child.g_n = child.parent.g_n + 1
                     board_in_open_list = False
                     for board in open_list:  # check if child is already in the open list
                         if board.board_string == child.board_string and child.g_n >= board.g_n:  # if the child is in the open list with a greater cost, do not add it to the open list
@@ -337,7 +437,7 @@ def uniform_cost_search(game_board_string, puzzle_number):
             next_parent = next_parent.parent
 
         # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-        create_solution_file("ucs", puzzle_number, initial_board, runtime, True, closed_list, solution_path)
+        create_solution_file("ucs", puzzle_number, initial_board, runtime, True, search_path=closed_list, solution_path=solution_path)
     else:  # goal state was not found
         # if the goal_state was not found, write limited solution information to the solution file
         create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
@@ -346,9 +446,81 @@ def uniform_cost_search(game_board_string, puzzle_number):
     create_search_file("ucs", puzzle_number, closed_list)
 
 
+def greedy_best_first_search(game_board_string, puzzle_number, heuristic_num):
+    initial_board = initialize_game_components(game_board_string)
+    heuristic = None
+
+    match heuristic_num:
+        case 1:
+            heuristic = Board.heuristic_1
+        case 2:
+            heuristic = Board.heuristic_2
+        case 3:
+            heuristic = Board.heuristic_3
+        case 4:
+            heuristic = Board.heuristic_4
+
+    heuristic(initial_board)  # set heuristic given passed heuristic function
+
+    open_list = []
+    closed_list = []
+    goal_state_found = False
+
+    open_list.append(initial_board)  # append the initial board to the open list
+    start = time()  # start algorithm time
+    while not goal_state_found and len(open_list) != 0:  # continue to search children if the goal state is not found and the open list is not 0
+        open_list.sort(key=lambda x: x.h_n, reverse=False)  # sort the open list by h(n) ascending
+        if open_list[0].is_goal_state():  # if the lowest heuristic node is the goal state
+            goal_state_found = True
+        else:  # if the lowest heuristic node is not the goal state
+            children = open_list[0].get_children()  # create the node's children
+            for child in children:
+                if child not in open_list and child not in closed_list:  # if the child is not already in the closed list (not visited)
+                    heuristic(child)
+                    open_list.append(child)
+                    # board_in_open_list = False
+                    # for board in open_list:  # check if child is already in the open list
+                    #     if board.board_string == child.board_string and child.g_n >= board.g_n:  # if the child is in the open list with a greater cost, do not add it to the open list
+                    #         board_in_open_list = True
+                    #         break
+                    #     elif board.board_string == child.board_string and child.g_n < board.g_n:  # if the child is in the open list with a lower cost, replace the old node with the child
+                    #         board_in_open_list = True
+                    #         open_list.remove(board)
+                    #         open_list.append(child)
+                    #         break
+                    # if not board_in_open_list:  # if the child is not in the open list, append it to the open list
+                    #     open_list.append(child)
+
+        closed_list.append(open_list.pop(0))  # pop the visited node and add it to the closed list
+
+    end = time()  # when out of the search, stop the end time
+    runtime = round(end - start, 2)  # calculate the runtime
+    if goal_state_found:  # if the goal state was found, calculate the solution path
+        solution_path = []
+        goal_state = closed_list[-1]  # the goal state is the last node in the closed list
+        solution_path.append(goal_state)
+
+        next_parent = goal_state.parent
+        while next_parent.parent is not None:  # append each parent from the goal_state to the solution path list
+            solution_path.insert(0, next_parent)
+            next_parent = next_parent.parent
+
+        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
+        create_solution_file("gbfs", puzzle_number, initial_board, runtime, True, heuristic_num, closed_list, solution_path)
+    else:  # goal state was not found
+        # if the goal_state was not found, write limited solution information to the solution file
+        create_solution_file("gbfs", puzzle_number, initial_board, runtime, False, heuristic_num)
+
+    # create and write search information to the search file
+    create_search_file("gbfs", puzzle_number, closed_list,heuristic_num)
+
+
 # creates and writes to a solution file
-def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, found_goal_state, search_path=None, solution_path=None):
-    with open(f"{algorithm_name}-sol-{puzzle_number}", "w") as file:
+def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, found_goal_state, heuristic_number=None, search_path=None, solution_path=None):
+    file_name = f"{algorithm_name}-sol-{puzzle_number}"
+    if heuristic_number:
+        file_name = f"{algorithm_name}-h{heuristic_number}-sol-{puzzle_number}"
+    with open(file_name, "w") as file:
         file.write(f"Initial board configuration: {initial_board.board_string}\n")
         file.write(f"\n{str(initial_board)}\n")
         file.write("Car fuel available: ")
@@ -369,8 +541,11 @@ def create_solution_file(algorithm_name, puzzle_number, initial_board, runtime, 
 
 
 # creates and writes to a search file
-def create_search_file(algorithm_name, puzzle_number, search_path):
-    with open(f"{algorithm_name}-search-{puzzle_number}", "w") as file:
+def create_search_file(algorithm_name, puzzle_number, search_path, heuristic_number=None):
+    file_name = f"{algorithm_name}-search-{puzzle_number}"
+    if heuristic_number:
+        file_name = f"{algorithm_name}-h{heuristic_number}-search-{puzzle_number}"
+    with open(file_name, "w") as file:
         for node in search_path:
             file.write(f"{node.g_n + node.h_n} {node.g_n} {node.h_n} {node.board_string}\n")
 
