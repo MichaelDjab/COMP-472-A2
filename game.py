@@ -225,26 +225,6 @@ class Board:
         return child_board
 
     def num_of_blocking_positions(self):
-        # a_car = None
-        # pos_between_a_and_exit = []
-        #
-        # for car in self.cars:
-        #     if car.name == "A":
-        #         a_car = car
-        #         break
-        #
-        # num_of_pos_between_a_and_exit = 5 - (a_car.column + a_car.length - 1)
-        # for i in range(num_of_pos_between_a_and_exit):
-        #     pos_between_a_and_exit.append((a_car.row, a_car.column + a_car.length + i))
-        #
-        # num_of_blocked_pos_between_a_and_exit = num_of_pos_between_a_and_exit
-        #
-        # for pos in pos_between_a_and_exit:
-        #     if pos in self.blank_spaces:
-        #         num_of_blocked_pos_between_a_and_exit -= 1
-        #
-        # return num_of_blocked_pos_between_a_and_exit
-
         a_car = None
         for car in self.cars:
             if car.name == "A":
@@ -260,34 +240,6 @@ class Board:
         return num_of_blocked_pos_between_a_and_exit
 
     def num_of_blocking_cars(self):
-        # a_car = None
-        # for car in self.cars:
-        #     if car.name == "A":
-        #         a_car = car
-        #         break
-        #
-        # number_of_block_positions = self.num_of_blocking_positions()
-        # blocking_car_count = 0
-        #
-        # for car in self.cars:
-        #     if car.is_horizontal and car.row == 2 and car.column > a_car.column + a_car.length -1:
-        #         blocking_car_count += 1
-        #         number_of_block_positions -= car.length
-        #         if number_of_block_positions == 0:
-        #             break
-        #
-        #     else:
-        #         if car.row == 2:
-        #             blocking_car_count += 1
-        #             number_of_block_positions -= 1
-        #             if number_of_block_positions == 0:
-        #                 break
-        #         elif car.row < 2 and (car.row + car.length - 1) >= 2:
-        #             blocking_car_count += 1
-        #             number_of_block_positions -= 1
-        #             if number_of_block_positions == 0:
-        #                 break
-        # return blocking_car_count
         a_car = None
         for car in self.cars:
             if car.name == "A":
@@ -302,15 +254,8 @@ class Board:
                 blocking_cars_count += 1
         return blocking_cars_count
 
-    def num_of_spaces(self):
-        a_car = None
-        for car in self.cars:
-            if car.name == "A":
-                a_car = car
-                break
-        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
-
-        return len(characters_after_a)
+    def abs_num_of_blocking_cars_minus_1(self):
+        return abs(self.num_of_blocking_cars() - 1)
 
     def heuristic_1(self):
         self.h_n = self.num_of_blocking_cars()
@@ -322,7 +267,7 @@ class Board:
         self.h_n = 5 * self.num_of_blocking_cars()
 
     def heuristic_4(self):
-        self.h_n = self.num_of_spaces()
+        self.h_n = self.abs_num_of_blocking_cars_minus_1()
 
 
 # read a game file and return a list of game strings
@@ -439,15 +384,6 @@ def uniform_cost_search(game_board_string, puzzle_number):
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
-    #         # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-    #         create_solution_file("ucs", puzzle_number, initial_board, runtime, True, search_path=closed_list, solution_path=solution_path)
-    # else:  # goal state was not found
-    #     # if the goal_state was not found, write limited solution information to the solution file
-    #     create_solution_file("ucs", puzzle_number, initial_board, runtime, False)
-    #
-    #     # create and write search information to the search file
-    #     create_search_file("ucs", puzzle_number, closed_list)
-
     return {"puzzle_number": puzzle_number,
             "algorithm_name": "ucs",
             "heuristic_number": None,
@@ -492,18 +428,6 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_number)
                 if child not in open_list and child not in closed_list:  # if the child is not already in the closed list (not visited)
                     heuristic(child)  # apply the heuristic on the child before appending to the open list
                     open_list.append(child)
-                    # board_in_open_list = False
-                    # for board in open_list:  # check if child is already in the open list
-                    #     if board.board_string == child.board_string and child.g_n >= board.g_n:  # if the child is in the open list with a greater cost, do not add it to the open list
-                    #         board_in_open_list = True
-                    #         break
-                    #     elif board.board_string == child.board_string and child.g_n < board.g_n:  # if the child is in the open list with a lower cost, replace the old node with the child
-                    #         board_in_open_list = True
-                    #         open_list.remove(board)
-                    #         open_list.append(child)
-                    #         break
-                    # if not board_in_open_list:  # if the child is not in the open list, append it to the open list
-                    #     open_list.append(child)
 
         closed_list.append(open_list.pop(0))  # pop the visited node and add it to the closed list
 
@@ -521,14 +445,6 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_number)
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
-        # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-    #     create_solution_file("gbfs", puzzle_number, initial_board, runtime, True, heuristic_number, closed_list, solution_path)
-    # else:  # goal state was not found
-    #     # if the goal_state was not found, write limited solution information to the solution file
-    #     create_solution_file("gbfs", puzzle_number, initial_board, runtime, False, heuristic_number)
-    #
-    # # create and write search information to the search file
-    # create_search_file("gbfs", puzzle_number, closed_list, heuristic_number)
     return {"puzzle_number": puzzle_number,
             "algorithm_name": "gbfs",
             "heuristic_number": heuristic_number,
@@ -603,14 +519,6 @@ def algorithm_a(game_board_string, puzzle_number, heuristic_number):
             solution_path.insert(0, next_parent)
             next_parent = next_parent.parent
 
-    #     # if the goal_state was found, pass the search path and solution path - create and write solution information to the solution file
-    #     create_solution_file("a", puzzle_number, initial_board, runtime, True, heuristic_number, closed_list, solution_path)
-    # else:  # goal state was not found
-    #     # if the goal_state was not found, write limited solution information to the solution file
-    #     create_solution_file("a", puzzle_number, initial_board, runtime, False, heuristic_number)
-    #
-    # # create and write search information to the search file
-    # create_search_file("a", puzzle_number, closed_list, heuristic_number)
     return {"puzzle_number": puzzle_number,
             "algorithm_name": "a",
             "heuristic_number": heuristic_number,
@@ -657,10 +565,6 @@ def create_search_file(algorithm_name, puzzle_number, search_path, heuristic_num
             file.write(f"{node.g_n + node.h_n} {node.g_n} {node.h_n} {node.board_string}\n")
 
 
-def create_data_frame(puzzle_number, algorithm_name, heuristic_number, solution_path_length, search_path_length, execution_time):
-    data = []
-
-
 def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False, create_output_files=False, create_excel_file=False):
     game_strings = read_game_file(game_file)
     data = []
@@ -687,13 +591,14 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                    game_info["heuristic_number"])
 
             if create_excel_file:
-                pass
+                data.append([puzzle_number,
+                             game_info["algorithm_name"],
+                             "NA",
+                             len(game_info["solution_path"]),
+                             len(game_info["search_path"]),
+                             game_info["runtime"]])
 
         if with_gbfs:
-            # h1_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=1)
-            # h2_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=2)
-            # h3_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=3)
-            # h4_game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=4)
             for i in range(1, 5):
                 game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=i)
                 if create_output_files:
@@ -713,7 +618,12 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                        game_info["heuristic_number"])
 
                 if create_excel_file:
-                    pass
+                    data.append([puzzle_number,
+                                 game_info["algorithm_name"],
+                                 "h" + str(i),
+                                 len(game_info["solution_path"]),
+                                 len(game_info["search_path"]),
+                                 game_info["runtime"]])
 
         if with_algo_a:
             for i in range(1, 5):
@@ -735,5 +645,14 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                        game_info["heuristic_number"])
 
                 if create_excel_file:
-                    pass
+                    data.append([puzzle_number,
+                                 game_info["algorithm_name"],
+                                 "h" + str(i),
+                                 len(game_info["solution_path"]),
+                                 len(game_info["search_path"]),
+                                 game_info["runtime"]])
 
+    if create_excel_file:
+        df = pd.DataFrame(data, columns=["Puzzle Number", "Algorithm", "Heuristic", "Length of the Solution", "Length of the Search Path", "Execution Time (in seconds)"])
+        with pd.ExcelWriter("rush_hour_analysis.xlsx") as writer:
+            df.to_excel(writer)
