@@ -1,0 +1,153 @@
+#
+# 50 puzzles
+#
+
+# 1
+...O.....OD.AA.OD.P..QQQP.BB..P.CC..
+
+# 2
+EEE......LBBAA.L.C.....C.DDOOO......
+
+# 3
+..BBBCDEEFFCD.AAGHI.O.GHI.O.JJKKO...
+
+# 4
+..BBC...K.C.AAK..EO...FEOGG.F.O...MM
+
+# 5
+LLL.COBBB.COAAD..OE.D...E.F.GG..F.SS
+
+# 6
+.O.XXX.OQQQ..OAAB..O..B..O..B..FF.LL
+
+# 7
+TTB.....BC..OAAC.EOFFMMEO.HXXXIIHZZZ
+
+# 8
+UU.MMMTT.BBBCDDAAECIIIIE..FOOOKKFZZZ
+
+# 9
+.SSCCO.DEFFO.DEAAOPPPG....HGII..HJJ.
+
+# 10
+SSS.....B..CAAB..C.DD...MM.HHH..KKK.
+
+# 11
+KO..BBKO....KOAACD....CD..EPPP..E...
+
+# 12
+...OOO.....BCCAA.B....DD....EE......
+
+# 13
+.BB.C...D.COAAD.EO.PPPEOQQQF.....F..
+
+# 14
+..O.....O...AAO.BCD...BCD...F.....F.
+
+# 15
+..BBCC..DEEOAAD..OFGGP.OFHHPI.QQQPI.
+
+# 16
+.....O.....OAAB..O..B.....C.....CPPP
+
+# 17
+O...BBO...P.O.AAP...E.P...E..G..II.G
+
+# 18
+..BBCC....DDAA..EF....EFGG.OOO......
+
+# 19
+.O.....OBB...OAACD....CD..E.FFGGEHH.
+
+# 20
+......B..PPPBAA.C.....C.....D.....D.
+
+# 21
+...O.....O..AA.O...........PPP...BB.
+
+# 22
+O.....OBBC..OAACDEFFGGDE...HII...HJJ
+
+# 23
+....OP....OPAA..OP...BCC...B.....QQQ
+
+# 24
+..OOOB....DBPQAAD.PQ....PQERRRFFEGG.
+
+# 25
+....BPCDD.BPCEFAAPQEF...QGG...Q...HH
+
+# 26
+..O.....OB.CAAOBDC....D.............
+
+# 27
+.BBCC..DDEEFAAG..FH.G..IHJJK.I...K..
+
+# 28
+.OOO........AAB.....B...C.DDEEC.....
+
+# 29
+O..BBCODDEECOAAFG....FG...HIJJKKHI..
+
+# 30
+...O.....O..AA.O.B.P...B.P...C.PDD.C
+
+# 31
+...OOO.......AA.B.PPP.B..CQQQ..C....
+
+# 32
+....BB....OP..AAOPQQQ.OP..C.DDEEC.FF
+
+# 33
+..OPPP..O...AAO....BB...............
+
+# 34
+.........O...AAO.....OP...BBP...CCP.
+
+# 35
+...B.O.CCB.OAAD..O..D.....E.....E...
+
+# 36
+..BBCC..DDEF..AAEF..O.....O.GG..O...
+
+# 37
+....O.BCDDO.BCAAO.EFG.HHEFGIIJPPP..J
+
+# 38
+........OOOP...AAP...Q.P...Q.....Q..
+
+# 39
+.O.BBP.O...P.OAACP....C...D.E...D.E.
+
+# 40
+.....O.PPP.O..AA.O...Q....BQCC..BQ..
+
+# 41
+.O..BB.O..CP.OAACP..D..P..DQQQRRR...
+
+# 42
+..O.....O...AAO..........BB..CPPP..C
+
+# 43
+.......BBOOOAA...C.....CDEEPPPD.....
+
+# 44
+O.PPP.O.....OAA...QQQB.....B........
+
+# 45
+....O.....O.AA..O...................
+
+# 46
+FF.EE....OOOAAPPPD.....D..BBCC......
+
+# 47
+OPPP.QO....QO..AAQ...RBB...R.....R..
+
+# 48
+OOO..B...CDBAA.CD....P.....P.....P..
+
+# 49
+...O.....O..AA.O.PQ...BPQCDDBPQC.RRR
+
+# 50
+..O.BB..OPPPAAO.........QQQ.C.....C.

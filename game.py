@@ -45,26 +45,27 @@ class Board:
 
         return board_string_2d
 
+    # two board are equal if they have the same board_string
     def __eq__(self, other):
         assert isinstance(other, Board)
         return self.board_string == other.board_string
 
     # generate and set the string representation of the board
     def generate_board_string(self):
-        game_string = [None] * self.size
+        board_string = [None] * self.size  # set game_string size to be the size of the board
 
-        for car in self.cars:
-            if car.is_horizontal:
-                for i in range(car.length):
-                    game_string[car.row * int(sqrt(self.size)) + car.column + i] = car.name
-            else:
-                for i in range(car.length):
-                    game_string[(car.row * int(sqrt(self.size))) + car.column + (i * int(sqrt(self.size)))] = car.name
+        for car in self.cars:  # for each car in the game board
+            if car.is_horizontal:  # if the car is horizontal
+                for i in range(car.length):  # number of characters to add to the board_string is equal to the length of the given car
+                    board_string[car.row * int(sqrt(self.size)) + car.column + i] = car.name
+            else:  # if the car is vertical
+                for i in range(car.length):  # number of characters to add to the board_string is equal to the length of the given car
+                    board_string[(car.row * int(sqrt(self.size))) + car.column + (i * int(sqrt(self.size)))] = car.name
 
-        for blank_space in self.blank_spaces:
-            game_string[blank_space[0] * int(sqrt(self.size)) + blank_space[1]] = "."
+        for blank_space in self.blank_spaces:  # for each blank space in the board's blank_spaces list add the "." to the corresponding index
+            board_string[blank_space[0] * int(sqrt(self.size)) + blank_space[1]] = "."
 
-        self.board_string = ''.join(game_string)
+        self.board_string = ''.join(board_string)  # set board_string to the string representation of the created list
 
     # given a board, find and set all possible moves of each car
     def find_possible_moves(self):
@@ -224,50 +225,53 @@ class Board:
         child_board.find_possible_moves()  # update each car's possible move list with a new set of moves
         return child_board
 
+    # returns the number of blocking positions
     def num_of_blocking_positions(self):
         a_car = None
-        for car in self.cars:
+        for car in self.cars:  # find the A car
             if car.name == "A":
                 a_car = car
                 break
-        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]  # slice the remaining characters after car A in its row
 
         num_of_blocked_pos_between_a_and_exit = 0
-        for char in characters_after_a:
+        for char in characters_after_a:  # for each  character after the A car, if the character is not "." it is a new blocking position
             if char != ".":
                 num_of_blocked_pos_between_a_and_exit += 1
 
         return num_of_blocked_pos_between_a_and_exit
 
+    # returns the number of blocking cars given a game board
     def num_of_blocking_cars(self):
         a_car = None
-        for car in self.cars:
+        for car in self.cars:  # find the A car
             if car.name == "A":
                 a_car = car
                 break
-        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]
-        unique_characters_after_a = set(characters_after_a)
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]  # slice the remaining characters after car A in its row
+        unique_characters_after_a = set(characters_after_a)  # find unique characters
 
         blocking_cars_count = 0
-        for char in unique_characters_after_a:
+        for char in unique_characters_after_a:  # for each unique character, if the character is not "." it is a new blocking car
             if char != ".":
                 blocking_cars_count += 1
         return blocking_cars_count
 
-    def abs_num_of_blocking_cars_minus_1(self):
-        return abs(self.num_of_blocking_cars() - 1)
-
+    # sets board's h_n = number of blocking cars
     def heuristic_1(self):
         self.h_n = self.num_of_blocking_cars()
 
+    # sets board's h_n = number of blocking positions
     def heuristic_2(self):
         self.h_n = self.num_of_blocking_positions()
 
+    # sets board's h_n = 5 * the number of blocking cars
     def heuristic_3(self):
         self.h_n = 5 * self.num_of_blocking_cars()
 
+    # sets board's h_n = 0
     def heuristic_4(self):
-        self.h_n = self.abs_num_of_blocking_cars_minus_1()
+        self.h_n = 0
 
 
 # read a game file and return a list of game strings
@@ -278,7 +282,7 @@ def read_game_file(file_name):
     game_strings = []
 
     for line in lines:
-        if '#' not in line and line:
+        if '#' not in line and line:  # if line does not start with # and is not blank append it to the game_strings list
             game_strings.append(line.strip())
 
     return game_strings
@@ -310,7 +314,7 @@ def initialize_game_components(game_string, board_size=36):
             temp_index = index
 
             if is_horizontal:  # if the car is horizontal
-                while game_string[temp_index] == game_string[temp_index + 1]:  # check if the next character is the same as the current
+                while temp_index + 1 < len(game_string) and game_string[temp_index] == game_string[temp_index + 1]:  # check if the next character is the same as the current
                     temp_index += 1
                     length += 1  # increment the car's length
                 temp_index = index  # reset the temp index
@@ -331,12 +335,12 @@ def initialize_game_components(game_string, board_size=36):
                 car.fuel = int(car_fuel[1])
                 break
 
-    game_board = Board(game_string[0: board_size], cars, blank_spaces, board_size, None, None, 0)
-    game_board.find_possible_moves()
+    game_board = Board(game_string[0: board_size], cars, blank_spaces, board_size, None, None, 0)  # initialize game board
+    game_board.find_possible_moves()  # initialize the possible_moves list of each car
     return game_board
 
 
-# performs uniform cost search on the give game_board_string and creates corresponding output files
+# performs uniform cost search on the give game_board_string and returns a dictionary of search data
 def uniform_cost_search(game_board_string, puzzle_number):
     initial_board = initialize_game_components(game_board_string)
 
@@ -395,6 +399,7 @@ def uniform_cost_search(game_board_string, puzzle_number):
             "goal_state_found": goal_state_found}
 
 
+# performs greedy best first search on the give game_board_string and returns a dictionary of search data
 def greedy_best_first_search(game_board_string, puzzle_number, heuristic_number):
     initial_board = initialize_game_components(game_board_string)
     heuristic = None
@@ -456,6 +461,7 @@ def greedy_best_first_search(game_board_string, puzzle_number, heuristic_number)
             "goal_state_found": goal_state_found}
 
 
+# performs algorithm A on the give game_board_string and returns a dictionary of search data
 def algorithm_a(game_board_string, puzzle_number, heuristic_number):
     initial_board = initialize_game_components(game_board_string)
     heuristic = None
@@ -565,15 +571,19 @@ def create_search_file(algorithm_name, puzzle_number, search_path, heuristic_num
             file.write(f"{node.g_n + node.h_n} {node.g_n} {node.h_n} {node.board_string}\n")
 
 
+# solves the puzzles in the given game file using the requested algorithms, producing the requested output files
 def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False, create_output_files=False, create_excel_file=False):
-    game_strings = read_game_file(game_file)
-    data = []
-    puzzle_number = 0
+    game_strings = read_game_file(game_file)  # all game string puzzles in the input file
+    data = []  # list that contains data for excel file output
+    puzzle_number = 0  # number of puzzles counter
     for game_string in game_strings:
         puzzle_number += 1
 
+        # if with_ucs=True, ucs is performed on each puzzle in the game_file
         if with_ucs:
-            game_info = uniform_cost_search(game_string, puzzle_number)
+            game_info = uniform_cost_search(game_string, puzzle_number)  # save search data dictionary
+
+            # if create_output_files=True, pass required search data
             if create_output_files:
                 create_solution_file(game_info["algorithm_name"],
                                      game_info["puzzle_number"],
@@ -590,6 +600,7 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                    game_info["search_path"],
                                    game_info["heuristic_number"])
 
+            # if create_excel_file=True, pass required search data
             if create_excel_file:
                 data.append([puzzle_number,
                              game_info["algorithm_name"],
@@ -598,9 +609,13 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                              len(game_info["search_path"]),
                              game_info["runtime"]])
 
+        # if with_gbfs=True, gbfs is performed on each puzzle in the game_file with all 4 heuristics
         if with_gbfs:
-            for i in range(1, 5):
-                game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=i)
+
+            for i in range(1, 5):  # for each heuristic
+                game_info = greedy_best_first_search(game_string, puzzle_number, heuristic_number=i)  # save search data dictionary
+
+                # if create_output_files=True, pass required search data
                 if create_output_files:
                     create_solution_file(game_info["algorithm_name"],
                                          game_info["puzzle_number"],
@@ -617,6 +632,7 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                        game_info["search_path"],
                                        game_info["heuristic_number"])
 
+                # if create_excel_file=True, pass required search data
                 if create_excel_file:
                     data.append([puzzle_number,
                                  game_info["algorithm_name"],
@@ -625,9 +641,12 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                  len(game_info["search_path"]),
                                  game_info["runtime"]])
 
+        # if with_algo_a=True, algorithm A is performed on each puzzle in the game_file with all 4 heuristics
         if with_algo_a:
-            for i in range(1, 5):
-                game_info = algorithm_a(game_string, puzzle_number, heuristic_number=i)
+            for i in range(1, 5):  # for each heuristic
+                game_info = algorithm_a(game_string, puzzle_number, heuristic_number=i)  # save search data dictionary
+
+                # if create_output_files=True, pass required search data
                 if create_output_files:
                     create_solution_file(game_info["algorithm_name"],
                                          game_info["puzzle_number"],
@@ -644,6 +663,7 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                        game_info["search_path"],
                                        game_info["heuristic_number"])
 
+                # if create_excel_file=True, pass required search data
                 if create_excel_file:
                     data.append([puzzle_number,
                                  game_info["algorithm_name"],
@@ -652,6 +672,7 @@ def solve_puzzles(game_file, with_ucs=False, with_gbfs=False, with_algo_a=False,
                                  len(game_info["search_path"]),
                                  game_info["runtime"]])
 
+    # if create_excel_file=True, create data frame with each algorithms search data and output to an excel file
     if create_excel_file:
         df = pd.DataFrame(data, columns=["Puzzle Number", "Algorithm", "Heuristic", "Length of the Solution", "Length of the Search Path", "Execution Time (in seconds)"])
         with pd.ExcelWriter("rush_hour_analysis.xlsx") as writer:
