@@ -257,6 +257,32 @@ class Board:
                 blocking_cars_count += 1
         return blocking_cars_count
 
+    # returns the number of blocking cars, however, if one of the blocked cars is vertical and has no possible moves, returns number of blocking cars + 1
+    def modified_num_of_blocking_cars(self):
+        a_car = None
+        for car in self.cars:  # find the A car
+            if car.name == "A":
+                a_car = car
+                break
+        characters_after_a = self.board_string[12 + a_car.column + a_car.length:18]  # slice the remaining characters after car A in its row
+        unique_characters_after_a = set(characters_after_a)  # find unique characters
+
+        blocking_cars_count = 0
+        contains_unmovable_blocking_vertical_car = False
+        for char in unique_characters_after_a:  # for each unique character, if the character is not "." it is a new blocking car
+            if char != ".":  # if the character is not a free space
+                blocking_cars_count += 1  # increment the number of blocked cars
+                if not contains_unmovable_blocking_vertical_car:  # if a trapped vertical has not been found yet check for one
+                    for car in self.cars:
+                        if car.name == char and not car.is_horizontal and len(car.possible_moves) == 0:  # if the car is vertical and its possible move list = 0
+                            contains_unmovable_blocking_vertical_car = True
+                            break
+
+        if contains_unmovable_blocking_vertical_car:
+            return blocking_cars_count + 1
+
+        return blocking_cars_count
+
     # sets board's h_n = number of blocking cars
     def heuristic_1(self):
         self.h_n = self.num_of_blocking_cars()
@@ -271,7 +297,7 @@ class Board:
 
     # sets board's h_n = 0
     def heuristic_4(self):
-        self.h_n = 0
+        self.h_n = self.modified_num_of_blocking_cars()
 
 
 # read a game file and return a list of game strings
